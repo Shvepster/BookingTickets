@@ -3,29 +3,59 @@ package com.example.bookingtickets.service;
 import com.example.bookingtickets.dto.EventResponseDto;
 import com.example.bookingtickets.mapper.EventMapper;
 import com.example.bookingtickets.repository.EventRepository;
-import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.stereotype.Service;
 
+/**
+ * Сервис для управления мероприятиями.
+ */
 @Service
 public class EventService {
-    private final EventRepository repository;
 
-    public EventService(EventRepository repository) {
-        this.repository = repository;
-    }
+  private final EventRepository repository;
 
-    public List<EventResponseDto> getAll() {
-        return repository.findAll().stream().map(EventMapper::toDto).collect(Collectors.toList());
-    }
+  /**
+   * Конструктор сервиса.
+   *
+   * @param repository репозиторий мероприятий
+   */
+  public EventService(EventRepository repository) {
+    this.repository = repository;
+  }
 
-    public EventResponseDto getById(Long id) {
-        return repository.findById(id).map(EventMapper::toDto)
-                .orElseThrow(() -> new IllegalArgumentException("Мероприятие не найдено"));
-    }
+  /**
+   * Возвращает список всех мероприятий.
+   *
+   * @return список DTO мероприятий
+   */
+  public List<EventResponseDto> getAll() {
+    return repository.findAll().stream()
+        .map(EventMapper::toDto)
+        .collect(Collectors.toList());
+  }
 
-    public List<EventResponseDto> getByCategory(String category) {
-        return repository.findByCategoryIgnoreCase(category).stream()
-                .map(EventMapper::toDto).collect(Collectors.toList());
-    }
+  /**
+   * Возвращает мероприятие по идентификатору.
+   *
+   * @param id идентификатор мероприятия
+   * @return DTO мероприятия
+   */
+  public EventResponseDto getById(Long id) {
+    return repository.findById(id)
+        .map(EventMapper::toDto)
+        .orElseThrow(() -> new IllegalArgumentException("Мероприятие не найдено"));
+  }
+
+  /**
+   * Возвращает список мероприятий по категории.
+   *
+   * @param category категория
+   * @return список DTO мероприятий
+   */
+  public List<EventResponseDto> getByCategory(String category) {
+    return repository.findByCategoryIgnoreCase(category).stream()
+        .map(EventMapper::toDto)
+        .collect(Collectors.toList());
+  }
 }

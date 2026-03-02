@@ -1,11 +1,21 @@
 package com.example.bookingtickets.repository;
 
 import com.example.bookingtickets.model.Event;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import java.util.List;
 
+/**
+ * Репозиторий для работы с мероприятиями.
+ */
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
-    List<Event> findByCategoryIgnoreCase(String category);
+
+  /**
+   * Поиск мероприятий по категории без учета регистра.
+   *
+   * @param category название категории
+   * @return список мероприятий
+   */
+  List<Event> findByCategoryIgnoreCase(String category);
 }
