@@ -25,7 +25,7 @@ public final class EventMapper {
         event.getId(),
         event.getTitle(),
         event.getCategory(),
-        event.getPrice() + " ₽"
+        event.getPrice() + " BYN"
     );
   }
 }
