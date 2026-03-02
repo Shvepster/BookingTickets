@@ -1,0 +1,8 @@
+### Получить все мероприятия
+GET http://localhost:8080/api/events
+
+### Получить мероприятие по ID (напр. Rammstein)
+GET http://localhost:8080/api/events/1
+
+### Поиск мероприятий в категории "Театр"
+GET http://localhost:8080/api/events?category=Театр

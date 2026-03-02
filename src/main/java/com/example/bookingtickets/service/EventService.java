@@ -4,7 +4,6 @@ import com.example.bookingtickets.dto.EventResponseDto;
 import com.example.bookingtickets.mapper.EventMapper;
 import com.example.bookingtickets.repository.EventRepository;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 /**
@@ -32,7 +31,7 @@ public class EventService {
   public List<EventResponseDto> getAll() {
     return repository.findAll().stream()
         .map(EventMapper::toDto)
-        .collect(Collectors.toList());
+        .toList(); // Исправлено здесь (вместо .collect(Collectors.toList()))
   }
 
   /**
@@ -56,6 +55,6 @@ public class EventService {
   public List<EventResponseDto> getByCategory(String category) {
     return repository.findByCategoryIgnoreCase(category).stream()
         .map(EventMapper::toDto)
-        .collect(Collectors.toList());
+        .toList(); // Исправлено здесь (вместо .collect(Collectors.toList()))
   }
 }
