@@ -29,8 +29,5 @@ public class DataLoader implements CommandLineRunner {
    */
   @Override
   public void run(String... args) {
-    repository.save(new Event("Концерт рок-группы Rammstein", "Музыка", 500.0));
-    repository.save(new Event("Дюна 2", "Кино", 60.0));
-    repository.save(new Event("Гамлет", "Театр", 120.0));
   }
 }
