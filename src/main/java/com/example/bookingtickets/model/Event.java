@@ -1,18 +1,24 @@
 package com.example.bookingtickets.model;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * Сущность мероприятия.
- */
 @Entity
 @Table(name = "events")
 @Getter
@@ -27,20 +33,17 @@ public class Event {
 
   private String title;
 
-  private String category;
-
   private Double price;
 
-  /**
-   * Конструктор для создания мероприятия без ID.
-   *
-   * @param title название
-   * @param category категория
-   * @param price цена
-   */
-  public Event(String title, String category, Double price) {
-    this.title = title;
-    this.category = category;
-    this.price = price;
-  }
+  private LocalDateTime eventDate;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "venue_id")
+  private Venue venue;
+
+  @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+  @JoinTable(name = "event_categories",
+      joinColumns = @JoinColumn(name = "event_id"),
+      inverseJoinColumns = @JoinColumn(name = "category_id"))
+  private Set<Category> categories = new HashSet<>();
 }

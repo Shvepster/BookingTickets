@@ -1,8 +1,8 @@
 package com.example.bookingtickets.controller;
 
-import com.example.bookingtickets.dto.EventRequestDto;
-import com.example.bookingtickets.dto.EventResponseDto;
-import com.example.bookingtickets.service.EventService;
+import com.example.bookingtickets.dto.VenueRequestDto;
+import com.example.bookingtickets.dto.VenueResponseDto;
+import com.example.bookingtickets.service.VenueService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,36 +17,36 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/events")
+@RequestMapping("/api/venues")
 @RequiredArgsConstructor
-public class EventController {
+public class VenueController {
 
-  private final EventService eventService;
+  private final VenueService venueService;
 
   @GetMapping
-  public List<EventResponseDto> getAll() {
-    return eventService.getAll();
+  public List<VenueResponseDto> getAll() {
+    return venueService.getAll();
   }
 
   @GetMapping("/{id}")
-  public EventResponseDto getById(@PathVariable Long id) {
-    return eventService.getById(id);
+  public VenueResponseDto getById(@PathVariable Long id) {
+    return venueService.getById(id);
   }
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
-  public EventResponseDto create(@RequestBody EventRequestDto dto) {
-    return eventService.create(dto);
+  public VenueResponseDto create(@RequestBody VenueRequestDto dto) {
+    return venueService.create(dto);
   }
 
   @PutMapping("/{id}")
-  public EventResponseDto update(@PathVariable Long id, @RequestBody EventRequestDto dto) {
-    return eventService.update(id, dto);
+  public VenueResponseDto update(@PathVariable Long id, @RequestBody VenueRequestDto dto) {
+    return venueService.update(id, dto);
   }
 
   @DeleteMapping("/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void delete(@PathVariable Long id) {
-    eventService.delete(id);
+    venueService.delete(id);
   }
 }

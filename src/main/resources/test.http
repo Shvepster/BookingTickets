@@ -1,8 +1,25 @@
-### Получить все мероприятия
+### 1. Создать новое мероприятие (POST / CREATE)
+POST http://localhost:8080/api/events
+Content-Type: application/json
+
+{
+  "title": "Новый Супер Концерт",
+  "price": 1000.0,
+  "venueId": null
+}
+
+### 2. Получить список всех мероприятий (GET / READ)
 GET http://localhost:8080/api/events
 
-### Получить мероприятие по ID (напр. Rammstein)
-GET http://localhost:8080/api/events/1
+### 3. Обновить мероприятие (PUT / UPDATE)
+### (цифра 1 в конце означает, что мы обновляем запись с ID = 1)
+PUT http://localhost:8080/api/events/1
+Content-Type: application/json
 
-### Поиск мероприятий в категории "Театр"
-GET http://localhost:8080/api/events?category=Театр
+{
+  "title": "Измененное название Концерта",
+  "price": 9999.0
+}
+
+### 4. Удалить мероприятие (DELETE)
+DELETE http://localhost:8080/api/events/3

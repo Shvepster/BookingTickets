@@ -1,8 +1,8 @@
 package com.example.bookingtickets.controller;
 
-import com.example.bookingtickets.dto.EventRequestDto;
-import com.example.bookingtickets.dto.EventResponseDto;
-import com.example.bookingtickets.service.EventService;
+import com.example.bookingtickets.dto.TicketRequestDto;
+import com.example.bookingtickets.dto.TicketResponseDto;
+import com.example.bookingtickets.service.TicketService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,36 +17,36 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/events")
+@RequestMapping("/api/tickets")
 @RequiredArgsConstructor
-public class EventController {
+public class TicketController {
 
-  private final EventService eventService;
+  private final TicketService ticketService;
 
   @GetMapping
-  public List<EventResponseDto> getAll() {
-    return eventService.getAll();
+  public List<TicketResponseDto> getAll() {
+    return ticketService.getAll();
   }
 
   @GetMapping("/{id}")
-  public EventResponseDto getById(@PathVariable Long id) {
-    return eventService.getById(id);
+  public TicketResponseDto getById(@PathVariable Long id) {
+    return ticketService.getById(id);
   }
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
-  public EventResponseDto create(@RequestBody EventRequestDto dto) {
-    return eventService.create(dto);
+  public TicketResponseDto create(@RequestBody TicketRequestDto dto) {
+    return ticketService.create(dto);
   }
 
   @PutMapping("/{id}")
-  public EventResponseDto update(@PathVariable Long id, @RequestBody EventRequestDto dto) {
-    return eventService.update(id, dto);
+  public TicketResponseDto update(@PathVariable Long id, @RequestBody TicketRequestDto dto) {
+    return ticketService.update(id, dto);
   }
 
   @DeleteMapping("/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void delete(@PathVariable Long id) {
-    eventService.delete(id);
+    ticketService.delete(id);
   }
 }

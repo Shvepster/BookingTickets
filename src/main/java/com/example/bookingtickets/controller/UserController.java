@@ -1,8 +1,8 @@
 package com.example.bookingtickets.controller;
 
-import com.example.bookingtickets.dto.EventRequestDto;
-import com.example.bookingtickets.dto.EventResponseDto;
-import com.example.bookingtickets.service.EventService;
+import com.example.bookingtickets.dto.UserRequestDto;
+import com.example.bookingtickets.dto.UserResponseDto;
+import com.example.bookingtickets.service.UserService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,36 +17,36 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/events")
+@RequestMapping("/api/users")
 @RequiredArgsConstructor
-public class EventController {
+public class UserController {
 
-  private final EventService eventService;
+  private final UserService userService;
 
   @GetMapping
-  public List<EventResponseDto> getAll() {
-    return eventService.getAll();
+  public List<UserResponseDto> getAll() {
+    return userService.getAll();
   }
 
   @GetMapping("/{id}")
-  public EventResponseDto getById(@PathVariable Long id) {
-    return eventService.getById(id);
+  public UserResponseDto getById(@PathVariable Long id) {
+    return userService.getById(id);
   }
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
-  public EventResponseDto create(@RequestBody EventRequestDto dto) {
-    return eventService.create(dto);
+  public UserResponseDto create(@RequestBody UserRequestDto dto) {
+    return userService.create(dto);
   }
 
   @PutMapping("/{id}")
-  public EventResponseDto update(@PathVariable Long id, @RequestBody EventRequestDto dto) {
-    return eventService.update(id, dto);
+  public UserResponseDto update(@PathVariable Long id, @RequestBody UserRequestDto dto) {
+    return userService.update(id, dto);
   }
 
   @DeleteMapping("/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void delete(@PathVariable Long id) {
-    eventService.delete(id);
+    userService.delete(id);
   }
 }

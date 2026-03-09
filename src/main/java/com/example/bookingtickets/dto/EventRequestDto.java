@@ -11,11 +11,10 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class EventResponseDto {
-  private Long id;
+public class EventRequestDto {
   private String title;
-  private String formattedPrice; // Например "50 BYN"
-  private String venueName;
+  private Double price;
+  private Long venueId;
+  private List<Long> categoryIds; // ID категорий
   private LocalDateTime eventDate;
-  private List<String> categories; // Названия категорий
 }

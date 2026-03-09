@@ -1,8 +1,8 @@
 package com.example.bookingtickets.controller;
 
-import com.example.bookingtickets.dto.EventRequestDto;
-import com.example.bookingtickets.dto.EventResponseDto;
-import com.example.bookingtickets.service.EventService;
+import com.example.bookingtickets.dto.CategoryRequestDto;
+import com.example.bookingtickets.dto.CategoryResponseDto;
+import com.example.bookingtickets.service.CategoryService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,36 +17,36 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/events")
+@RequestMapping("/api/categories")
 @RequiredArgsConstructor
-public class EventController {
+public class CategoryController {
 
-  private final EventService eventService;
+  private final CategoryService categoryService;
 
   @GetMapping
-  public List<EventResponseDto> getAll() {
-    return eventService.getAll();
+  public List<CategoryResponseDto> getAll() {
+    return categoryService.getAll();
   }
 
   @GetMapping("/{id}")
-  public EventResponseDto getById(@PathVariable Long id) {
-    return eventService.getById(id);
+  public CategoryResponseDto getById(@PathVariable Long id) {
+    return categoryService.getById(id);
   }
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
-  public EventResponseDto create(@RequestBody EventRequestDto dto) {
-    return eventService.create(dto);
+  public CategoryResponseDto create(@RequestBody CategoryRequestDto dto) {
+    return categoryService.create(dto);
   }
 
   @PutMapping("/{id}")
-  public EventResponseDto update(@PathVariable Long id, @RequestBody EventRequestDto dto) {
-    return eventService.update(id, dto);
+  public CategoryResponseDto update(@PathVariable Long id, @RequestBody CategoryRequestDto dto) {
+    return categoryService.update(id, dto);
   }
 
   @DeleteMapping("/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void delete(@PathVariable Long id) {
-    eventService.delete(id);
+    categoryService.delete(id);
   }
 }

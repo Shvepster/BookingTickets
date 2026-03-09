@@ -1,6 +1,6 @@
 package com.example.bookingtickets.repository;
 
-import com.example.bookingtickets.model.Event;
+import com.example.bookingtickets.model.Venue;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -8,13 +8,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface EventRepository extends JpaRepository<Event, Long> {
+public interface VenueRepository extends JpaRepository<Venue, Long> {
 
   @Override
-  @EntityGraph(attributePaths = {"venue", "categories"})
-  List<Event> findAll();
+  @EntityGraph(attributePaths = {"events"})
+  List<Venue> findAll();
 
   @Override
-  @EntityGraph(attributePaths = {"venue", "categories"})
-  Optional<Event> findById(Long id);
+  @EntityGraph(attributePaths = {"events"})
+  Optional<Venue> findById(Long id);
 }

@@ -1,22 +1,15 @@
 package com.example.bookingtickets.mapper;
 
 import com.example.bookingtickets.dto.EventResponseDto;
+import com.example.bookingtickets.model.Category;
 import com.example.bookingtickets.model.Event;
+import java.util.List;
+import java.util.stream.Collectors;
 
-/**
- * Маппер для преобразования сущности Event в DTO.
- */
 public final class EventMapper {
 
-  private EventMapper() {
-  }
+  private EventMapper() {}
 
-  /**
-   * Преобразует сущность Event в EventResponseDto.
-   *
-   * @param event сущность мероприятия
-   * @return объект DTO
-   */
   public static EventResponseDto toDto(Event event) {
     if (event == null) {
       return null;
@@ -24,8 +17,11 @@ public final class EventMapper {
     return new EventResponseDto(
         event.getId(),
         event.getTitle(),
-        event.getCategory(),
-        event.getPrice() + " BYN"
+        event.getPrice() + " BYN",
+        event.getVenue() != null ? event.getVenue().getName() : "Площадка не указана",
+        event.getEventDate(),
+        event.getCategories() == null ? null :
+            event.getCategories().stream().map(Category::getName).collect(Collectors.toList())
     );
   }
 }
