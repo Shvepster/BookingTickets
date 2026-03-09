@@ -35,7 +35,7 @@ public class Event {
 
   private Double price;
 
-  private LocalDateTime Date;
+  private LocalDateTime date;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "venue_id")
