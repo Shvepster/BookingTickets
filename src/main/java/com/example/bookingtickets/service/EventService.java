@@ -31,7 +31,7 @@ public class EventService {
     Event event = new Event();
     event.setTitle(dto.getTitle());
     event.setPrice(dto.getPrice());
-    event.setEventDate(dto.getEventDate());
+    event.setDate(dto.getEventDate());
 
     // Устанавливаем площадку, если передан venueId
     if (dto.getVenueId() != null) {
@@ -64,7 +64,7 @@ public class EventService {
 
     event.setTitle(dto.getTitle());
     event.setPrice(dto.getPrice());
-    event.setEventDate(dto.getEventDate());
+    event.setDate(dto.getEventDate());
 
     // Обновляем площадку, если передан venueId
     if (dto.getVenueId() != null) {

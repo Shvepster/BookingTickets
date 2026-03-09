@@ -19,7 +19,7 @@ public final class EventMapper {
         event.getTitle(),
         event.getPrice() + " BYN",
         event.getVenue() != null ? event.getVenue().getName() : "Площадка не указана",
-        event.getEventDate(),
+        event.getDate(),
         event.getCategories() == null ? null :
             event.getCategories().stream().map(Category::getName).collect(Collectors.toList())
     );
