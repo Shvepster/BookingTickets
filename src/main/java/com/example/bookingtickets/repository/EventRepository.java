@@ -17,4 +17,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
   @Override
   @EntityGraph(attributePaths = {"venue", "categories"})
   Optional<Event> findById(Long id);
+
+  @EntityGraph(attributePaths = {"venue", "categories"})
+  List<Event> findByTitleContainingIgnoreCase(String title);
 }

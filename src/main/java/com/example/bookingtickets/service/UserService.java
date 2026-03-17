@@ -56,4 +56,10 @@ public class UserService {
     }
     return result;
   }
+
+  public List<UserResponseDto> searchByUsername(String username) {
+    return userRepository.findByUsernameContainingIgnoreCase(username).stream()
+        .map(UserMapper::toDto)
+        .toList();
+  }
 }

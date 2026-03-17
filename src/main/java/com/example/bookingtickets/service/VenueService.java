@@ -56,4 +56,10 @@ public class VenueService {
     }
     return result;
   }
+
+  public List<VenueResponseDto> searchByName(String name) {
+    return venueRepository.findByNameContainingIgnoreCase(name).stream()
+        .map(VenueMapper::toDto)
+        .toList();
+  }
 }

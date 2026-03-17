@@ -54,4 +54,10 @@ public class CategoryService {
     }
     return result;
   }
+
+  public List<CategoryResponseDto> searchByName(String name) {
+    return categoryRepository.findByNameContainingIgnoreCase(name).stream()
+        .map(CategoryMapper::toDto)
+        .toList();
+  }
 }

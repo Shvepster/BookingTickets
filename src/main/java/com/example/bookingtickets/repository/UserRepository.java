@@ -18,4 +18,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
   @Override
   @EntityGraph(attributePaths = {"tickets"})
   Optional<User> findById(Long id);
+
+  @EntityGraph(attributePaths = {"tickets"})
+  List<User> findByUsernameContainingIgnoreCase(String username);
 }

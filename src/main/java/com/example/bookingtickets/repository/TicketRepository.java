@@ -17,4 +17,7 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
   @Override
   @EntityGraph(attributePaths = {"user", "event"})
   Optional<Ticket> findById(Long id);
+
+  @EntityGraph(attributePaths = {"user", "event"})
+  List<Ticket> findByUserId(Long userId);
 }

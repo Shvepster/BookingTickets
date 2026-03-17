@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam; // Добавлен импорт
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,6 +32,11 @@ public class TicketController {
   @GetMapping("/{id}")
   public TicketResponseDto getById(@PathVariable Long id) {
     return ticketService.getById(id);
+  }
+
+  @GetMapping("/search")
+  public List<TicketResponseDto> search(@RequestParam Long userId) {
+    return ticketService.searchByUserId(userId);
   }
 
   @PostMapping

@@ -81,4 +81,10 @@ public class TicketService {
     }
     return result;
   }
+
+  public List<TicketResponseDto> searchByUserId(Long userId) {
+    return ticketRepository.findByUserId(userId).stream()
+        .map(TicketMapper::toDto)
+        .toList();
+  }
 }

@@ -10,4 +10,6 @@ import org.springframework.stereotype.Repository;
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
   List<Category> findAllByIdIn(Collection<Long> ids);
+
+  List<Category> findByNameContainingIgnoreCase(String name);
 }
