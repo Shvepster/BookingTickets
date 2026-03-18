@@ -87,4 +87,11 @@ public class TicketService {
         .map(TicketMapper::toDto)
         .toList();
   }
+
+  @Transactional
+  public void createMultiple(List<TicketRequestDto> dtos) {
+    for (TicketRequestDto dto : dtos) {
+      create(dto); // Вызываем базовый метод сохранения одного билета
+    }
+  }
 }

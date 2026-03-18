@@ -1,5 +1,6 @@
 package com.example.bookingtickets.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -16,5 +17,6 @@ public class EventRequestDto {
   private Double price;
   private Long venueId;
   private List<Long> categoryIds; // ID категорий
+  @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
   private LocalDateTime eventDate;
 }

@@ -20,4 +20,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
   @EntityGraph(attributePaths = {"venue", "categories"})
   List<Event> findByTitleContainingIgnoreCase(String title);
+
+  @org.springframework.data.jpa.repository.Query("SELECT e FROM Event e")
+  List<Event> findAllWithoutEntityGraph();
 }
