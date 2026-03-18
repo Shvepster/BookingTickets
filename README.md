@@ -13,3 +13,5 @@
 3. `Venue` (Площадка - театр, стадион)
 4. `Ticket` (Билет)
 5. `Category` (Категория/Тег - "Рок", "Комедия", "18+")
+
+https://sonarcloud.io/summary/new_code?id=Shvepster_BookingTickets&branch=main
