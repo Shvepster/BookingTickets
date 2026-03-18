@@ -14,4 +14,18 @@
 4. `Ticket` (Билет)
 5. `Category` (Категория/Тег - "Рок", "Комедия", "18+")
 
-https://sonarcloud.io/summary/new_code?id=Shvepster_BookingTickets&branch=main
+### Примеры связей:
+* **Venue → Event** — OneToMany (одна площадка принимает много мероприятий).
+* **User → Ticket** — OneToMany (один пользователь может владеть множеством билетов).
+* **Event ↔ Category** — ManyToMany (мероприятие может относиться к нескольким категориям).
+* **Event → Ticket** — OneToMany (на одно мероприятие выпускается множество билетов).
+
+## Качество кода
+
+### Checkstyle
+В проекте настроен плагин `maven-checkstyle-plugin`. Код приведен к стандарту **Google Checks**, что обеспечивает единообразие и чистоту исходного кода.
+
+### SonarQube Cloud
+Для статического анализа кода используется SonarCloud. Проект проходит проверку через настроенный Quality Gate.
+
+[![Quality Gate Status](ССЫЛКА_НА_ТВОЙ_БАДЖ_ИЗ_SONARCLOUD)](ССЫЛКА_НА_ТВОЙ_ПРОЕКТ_В_SONARCLOUD)
