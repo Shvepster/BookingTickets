@@ -24,8 +24,7 @@ public class TicketService {
   private final UserRepository userRepository;
   private final EventRepository eventRepository;
 
-  @Transactional
-  public TicketResponseDto create(TicketRequestDto dto) {
+  private TicketResponseDto saveTicketInternal(TicketRequestDto dto) {
     User user = userRepository.findById(dto.getUserId())
         .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
     Event event = eventRepository.findById(dto.getEventId())
@@ -73,6 +72,11 @@ public class TicketService {
         .orElseThrow(() -> new IllegalArgumentException("Билет не найден"));
   }
 
+  @Transactional
+  public TicketResponseDto create(TicketRequestDto dto) {
+    return saveTicketInternal(dto); // Вызываем приватный метод
+  }
+
   public List<TicketResponseDto> getAll() {
     List<Ticket> tickets = ticketRepository.findAll();
     List<TicketResponseDto> result = new ArrayList<>();
@@ -91,7 +95,7 @@ public class TicketService {
   @Transactional
   public void createMultiple(List<TicketRequestDto> dtos) {
     for (TicketRequestDto dto : dtos) {
-      create(dto); // Вызываем базовый метод сохранения одного билета
+      saveTicketInternal(dto);
     }
   }
 }
