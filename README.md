@@ -28,4 +28,4 @@
 ### SonarQube Cloud
 Для статического анализа кода используется SonarCloud. Проект проходит проверку через настроенный Quality Gate.
 
-[![Quality Gate Status](ССЫЛКА_НА_ТВОЙ_БАДЖ_ИЗ_SONARCLOUD)](ССЫЛКА_НА_ТВОЙ_ПРОЕКТ_В_SONARCLOUD)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Shvepster_BookingTickets&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Shvepster_BookingTickets)
