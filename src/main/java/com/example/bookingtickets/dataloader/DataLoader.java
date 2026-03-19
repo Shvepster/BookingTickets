@@ -92,21 +92,19 @@ public class DataLoader implements CommandLineRunner {
   }
 
   private void demonstrateNplusOneProblem() {
-    log.info("--- НАЧАЛО ДЕМОНСТРАЦИИ N+1 (ПЛОХОЙ ВАРИАНТ) ---");
+    log.info("НАЧАЛО ДЕМОНСТРАЦИИ N+1");
     List<Event> badEvents = eventRepository.findAllWithoutEntityGraph();
     for (Event e : badEvents) {
       log.info("Мероприятие: {}, Площадка: {}",
           e.getTitle(), e.getVenue().getName());
     }
-    log.info("--- КОНЕЦ ПЛОХОГО ВАРИАНТА ---");
 
 
-    log.info("--- НАЧАЛО ДЕМОНСТРАЦИИ РЕШЕНИЯ С @EntityGraph (ХОРОШИЙ ВАРИАНТ) ---");
-    // Всего 1 запрос с JOIN FETCH: достаем сразу мероприятия ВМЕСТЕ с площадками
+    log.info("НАЧАЛО ДЕМОНСТРАЦИИ РЕШЕНИЯ С @EntityGraph");
     List<Event> goodEvents = eventRepository.findAll();
     for (Event e : goodEvents) {
       log.info("Мероприятие: {}, Площадка: {}", e.getTitle(), e.getVenue().getName());
     }
-    log.info("--- КОНЕЦ ХОРОШЕГО ВАРИАНТА ---");
+    log.info("КОНЕЦ ХОРОШЕГО ВАРИАНТА");
   }
 }
