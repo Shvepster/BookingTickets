@@ -9,12 +9,19 @@ import com.example.bookingtickets.model.Venue;
 import com.example.bookingtickets.repository.CategoryRepository;
 import com.example.bookingtickets.repository.EventRepository;
 import com.example.bookingtickets.repository.VenueRepository;
+import com.example.bookingtickets.service.cache.EventSearchKey;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -23,6 +30,12 @@ public class EventService {
   private final EventRepository eventRepository;
   private final VenueRepository venueRepository;
   private final CategoryRepository categoryRepository;
+  private final Map<EventSearchKey, Page<EventResponseDto>> eventCache = new HashMap<>();
+
+  private void invalidateCache() {
+    log.info("Очистка In-Memory кэша мероприятий...");
+    eventCache.clear();
+  }
 
   @Transactional
   public EventResponseDto create(EventRequestDto dto) {
@@ -48,6 +61,7 @@ public class EventService {
     }
 
     Event saved = eventRepository.save(event);
+    invalidateCache(); // <-- СБРОС КЭША ПРИ СОЗДАНИИ
     return EventMapper.toDto(saved);
   }
 
@@ -79,12 +93,14 @@ public class EventService {
     }
 
     Event updated = eventRepository.save(event);
+    invalidateCache(); // <-- СБРОС КЭША ПРИ ОБНОВЛЕНИИ
     return EventMapper.toDto(updated);
   }
 
   @Transactional
   public void delete(Long id) {
     eventRepository.deleteById(id);
+    invalidateCache(); // <-- СБРОС КЭША ПРИ УДАЛЕНИИ
   }
 
   public EventResponseDto getById(Long id) {
@@ -103,5 +119,35 @@ public class EventService {
     return eventRepository.findByTitleContainingIgnoreCase(title).stream()
         .map(EventMapper::toDto)
         .toList();
+  }
+
+  public Page<EventResponseDto> searchComplexEvents(
+      String venueName, String categoryName, Pageable pageable, boolean useNative) {
+
+    EventSearchKey key = new EventSearchKey(
+        venueName, categoryName, pageable.getPageNumber(), pageable.getPageSize(), useNative
+    );
+
+    if (eventCache.containsKey(key)) {
+      log.info("Данные найдены в кэше. Возврат из In-Memory индекса для ключа: {}", key);
+      return eventCache.get(key);
+    }
+
+    log.info("Данные не найдены в кэше. Выполнение запроса к БД (useNative={})...", useNative);
+    Page<Event> eventPage;
+
+    if (useNative) {
+      eventPage = eventRepository.findComplexByNative(venueName, categoryName, pageable);
+    } else {
+      eventPage = eventRepository.findComplexByJpql(venueName, categoryName, pageable);
+    }
+
+    // 3. Маппим Entity в DTO
+    Page<EventResponseDto> dtoPage = eventPage.map(EventMapper::toDto);
+
+    // 4. Сохраняем результат в кэш
+    eventCache.put(key, dtoPage);
+
+    return dtoPage;
   }
 }

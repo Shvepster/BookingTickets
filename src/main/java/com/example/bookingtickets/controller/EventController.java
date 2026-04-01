@@ -5,6 +5,8 @@ import com.example.bookingtickets.dto.EventResponseDto;
 import com.example.bookingtickets.service.EventService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,7 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam; // Добавлен импорт
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,6 +39,15 @@ public class EventController {
   @GetMapping("/search")
   public List<EventResponseDto> search(@RequestParam String title) {
     return eventService.searchByTitle(title);
+  }
+
+  @GetMapping("/search-complex")
+  public Page<EventResponseDto> searchComplex(
+      @RequestParam String venueName,
+      @RequestParam String categoryName,
+      @RequestParam(defaultValue = "false") boolean useNative,
+      Pageable pageable) {
+    return eventService.searchComplexEvents(venueName, categoryName, pageable, useNative);
   }
 
   @PostMapping

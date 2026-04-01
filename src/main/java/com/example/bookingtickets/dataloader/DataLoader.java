@@ -92,14 +92,6 @@ public class DataLoader implements CommandLineRunner {
   }
 
   private void demonstrateNplusOneProblem() {
-    log.info("НАЧАЛО ДЕМОНСТРАЦИИ N+1");
-    List<Event> badEvents = eventRepository.findAllWithoutEntityGraph();
-    for (Event e : badEvents) {
-      log.info("Мероприятие: {}, Площадка: {}",
-          e.getTitle(), e.getVenue().getName());
-    }
-
-
     log.info("НАЧАЛО ДЕМОНСТРАЦИИ РЕШЕНИЯ С @EntityGraph");
     List<Event> goodEvents = eventRepository.findAll();
     for (Event e : goodEvents) {
