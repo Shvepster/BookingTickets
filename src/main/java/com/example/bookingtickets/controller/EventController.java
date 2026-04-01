@@ -41,6 +41,11 @@ public class EventController {
     return eventService.searchByTitle(title);
   }
 
+  @GetMapping("/paged")
+  public Page<EventResponseDto> getPaged(Pageable pageable) {
+    return eventService.getAllPaged(pageable);
+  }
+
   @GetMapping("/search-complex")
   public Page<EventResponseDto> searchComplex(
       @RequestParam String venueName,

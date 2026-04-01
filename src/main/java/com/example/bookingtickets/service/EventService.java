@@ -121,6 +121,10 @@ public class EventService {
         .toList();
   }
 
+  public Page<EventResponseDto> getAllPaged(Pageable pageable) {
+    return eventRepository.findAll(pageable).map(EventMapper::toDto);
+  }
+
   public Page<EventResponseDto> searchComplexEvents(
       String venueName, String categoryName, Pageable pageable, boolean useNative) {
 
@@ -142,10 +146,8 @@ public class EventService {
       eventPage = eventRepository.findComplexByJpql(venueName, categoryName, pageable);
     }
 
-    // 3. Маппим Entity в DTO
     Page<EventResponseDto> dtoPage = eventPage.map(EventMapper::toDto);
 
-    // 4. Сохраняем результат в кэш
     eventCache.put(key, dtoPage);
 
     return dtoPage;
