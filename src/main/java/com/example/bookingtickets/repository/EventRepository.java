@@ -20,6 +20,10 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
   @Override
   @EntityGraph(attributePaths = {"venue", "categories"})
+  Page<Event> findAll(Pageable pageable);
+
+  @Override
+  @EntityGraph(attributePaths = {"venue", "categories"})
   Optional<Event> findById(Long id);
 
   @EntityGraph(attributePaths = {"venue", "categories"})
