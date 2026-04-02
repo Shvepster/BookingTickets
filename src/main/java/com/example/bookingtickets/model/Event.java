@@ -10,9 +10,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany; // ДОБАВЛЕНО
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.ArrayList; // ДОБАВЛЕНО
 import java.util.HashSet;
+import java.util.List; // ДОБАВЛЕНО
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -46,4 +49,7 @@ public class Event {
       joinColumns = @JoinColumn(name = "event_id"),
       inverseJoinColumns = @JoinColumn(name = "category_id"))
   private Set<Category> categories = new HashSet<>();
+
+  @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Ticket> tickets = new ArrayList<>();
 }
