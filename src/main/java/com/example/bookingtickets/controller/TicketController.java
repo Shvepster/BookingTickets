@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/tickets")
 @RequiredArgsConstructor
 @Validated
-@Tag(name = "3. Билеты", description = "Покупка и Bulk-операции")
+@Tag(name = "3. Билеты", description = "Покупка билетов")
 public class TicketController {
 
   private final TicketService ticketService;
@@ -43,8 +43,7 @@ public class TicketController {
 
   @PostMapping("/bulk")
   @ResponseStatus(HttpStatus.CREATED)
-  @Operation(summary = "Массовая покупка (Транзакционно)",
-      description = "Откатывает всё при ошибке любого билета в списке.")
+  @Operation(summary = "Массовая покупка (Блок 5)")
   @ApiResponses({
       @ApiResponse(responseCode = "201", description = "Успешно"),
       @ApiResponse(responseCode = "400", description = "Ошибка валидации",
@@ -55,12 +54,14 @@ public class TicketController {
   }
 
   @GetMapping("/{id}")
+  @Operation(summary = "Инфо о билете")
   public TicketResponseDto getById(@PathVariable @Positive Long id) {
     return ticketService.getById(id);
   }
 
   @DeleteMapping("/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
+  @Operation(summary = "Вернуть билет")
   public void delete(@PathVariable @Positive Long id) {
     ticketService.delete(id);
   }

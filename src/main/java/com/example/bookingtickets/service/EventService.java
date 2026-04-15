@@ -34,74 +34,46 @@ public class EventService {
   private final Map<EventSearchKey, Page<EventResponseDto>> eventCache = new HashMap<>();
 
   private void invalidateCache() {
-    log.info("Очистка In-Memory кэша мероприятий...");
+    log.info("Инвалидация кэша мероприятий...");
     eventCache.clear();
   }
 
   @Transactional
   public EventResponseDto create(EventRequestDto dto) {
     Event event = new Event();
-    event.setTitle(dto.getTitle());
-    event.setPrice(dto.getPrice());
-    event.setDate(dto.getEventDate());
-
-    if (dto.getVenueId() != null) {
-      Venue venue = venueRepository.findById(dto.getVenueId())
-          .orElseThrow(() -> new NotFoundException("Площадка не найдена"));
-      event.setVenue(venue);
-    }
-
-    if (dto.getCategoryIds() != null && !dto.getCategoryIds().isEmpty()) {
-      List<Category> categories = categoryRepository.findAllByIdIn(dto.getCategoryIds());
-      if (categories.size() != dto.getCategoryIds().size()) {
-        throw new NotFoundException("Некоторые категории не найдены");
-      }
-      event.setCategories(new HashSet<>(categories));
-    } else {
-      event.setCategories(new HashSet<>());
-    }
-
-    Event saved = eventRepository.save(event);
+    fillEventData(event, dto);
     invalidateCache();
-    return EventMapper.toDto(saved);
+    return EventMapper.toDto(eventRepository.save(event));
   }
 
   @Transactional
   public EventResponseDto update(Long id, EventRequestDto dto) {
     Event event = eventRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Мероприятие не найдено"));
+    fillEventData(event, dto);
+    invalidateCache();
+    return EventMapper.toDto(eventRepository.save(event));
+  }
 
+  private void fillEventData(Event event, EventRequestDto dto) {
     event.setTitle(dto.getTitle());
     event.setPrice(dto.getPrice());
     event.setDate(dto.getEventDate());
 
-    if (dto.getVenueId() != null) {
-      Venue venue = venueRepository.findById(dto.getVenueId())
-          .orElseThrow(() -> new NotFoundException("Площадка не найдена"));
-      event.setVenue(venue);
-    } else {
-      event.setVenue(null);
-    }
+    Venue venue = venueRepository.findById(dto.getVenueId())
+        .orElseThrow(() -> new NotFoundException("Площадка не найдена"));
+    event.setVenue(venue);
 
     if (dto.getCategoryIds() != null && !dto.getCategoryIds().isEmpty()) {
-      List<Category> categories = categoryRepository.findAllByIdIn(dto.getCategoryIds());
-      if (categories.size() != dto.getCategoryIds().size()) {
-        throw new NotFoundException("Некоторые категории не найдены");
-      }
-      event.setCategories(new HashSet<>(categories));
-    } else {
-      event.setCategories(new HashSet<>());
+      List<Category> cats = categoryRepository.findAllByIdIn(dto.getCategoryIds());
+      event.setCategories(new HashSet<>(cats));
     }
-
-    Event updated = eventRepository.save(event);
-    invalidateCache(); // <-- СБРОС КЭША ПРИ ОБНОВЛЕНИИ
-    return EventMapper.toDto(updated);
   }
 
   @Transactional
   public void delete(Long id) {
     eventRepository.deleteById(id);
-    invalidateCache(); // <-- СБРОС КЭША ПРИ УДАЛЕНИИ
+    invalidateCache();
   }
 
   public EventResponseDto getById(Long id) {
@@ -111,15 +83,12 @@ public class EventService {
   }
 
   public List<EventResponseDto> getAll() {
-    return eventRepository.findAll().stream()
-        .map(EventMapper::toDto)
-        .toList();
+    return eventRepository.findAll().stream().map(EventMapper::toDto).toList();
   }
 
   public List<EventResponseDto> searchByTitle(String title) {
     return eventRepository.findByTitleContainingIgnoreCase(title).stream()
-        .map(EventMapper::toDto)
-        .toList();
+        .map(EventMapper::toDto).toList();
   }
 
   public Page<EventResponseDto> getAllPaged(Pageable pageable) {
@@ -127,30 +96,22 @@ public class EventService {
   }
 
   public Page<EventResponseDto> searchComplexEvents(
-      String venueName, String categoryName, Pageable pageable, boolean useNative) {
+      String venue, String cat, Pageable page, boolean useNative) {
 
     EventSearchKey key = new EventSearchKey(
-        venueName, categoryName, pageable.getPageNumber(), pageable.getPageSize(), useNative
-    );
+        venue, cat, page.getPageNumber(), page.getPageSize(), useNative);
 
     if (eventCache.containsKey(key)) {
-      log.info("Данные найдены в кэше. Возврат из In-Memory индекса для ключа: {}", key);
+      log.info("Возврат из кэша для: {}", key);
       return eventCache.get(key);
     }
 
-    log.info("Данные не найдены в кэше. Выполнение запроса к БД (useNative={})...", useNative);
-    Page<Event> eventPage;
-
-    if (useNative) {
-      eventPage = eventRepository.findComplexByNative(venueName, categoryName, pageable);
-    } else {
-      eventPage = eventRepository.findComplexByJpql(venueName, categoryName, pageable);
-    }
+    Page<Event> eventPage = useNative
+        ? eventRepository.findComplexByNative(venue, cat, page)
+        : eventRepository.findComplexByJpql(venue, cat, page);
 
     Page<EventResponseDto> dtoPage = eventPage.map(EventMapper::toDto);
-
     eventCache.put(key, dtoPage);
-
     return dtoPage;
   }
 }

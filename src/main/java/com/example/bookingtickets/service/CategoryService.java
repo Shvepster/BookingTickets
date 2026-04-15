@@ -6,7 +6,6 @@ import com.example.bookingtickets.exception.NotFoundException;
 import com.example.bookingtickets.mapper.CategoryMapper;
 import com.example.bookingtickets.model.Category;
 import com.example.bookingtickets.repository.CategoryRepository;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,8 +22,7 @@ public class CategoryService {
   public CategoryResponseDto create(CategoryRequestDto dto) {
     Category category = new Category();
     category.setName(dto.getName());
-    Category saved = categoryRepository.save(category);
-    return CategoryMapper.toDto(saved);
+    return CategoryMapper.toDto(categoryRepository.save(category));
   }
 
   @Transactional
@@ -32,28 +30,27 @@ public class CategoryService {
     Category category = categoryRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Категория не найдена"));
     category.setName(dto.getName());
-    Category saved = categoryRepository.save(category);
-    return CategoryMapper.toDto(saved);
+    return CategoryMapper.toDto(categoryRepository.save(category));
   }
 
   @Transactional
   public void delete(Long id) {
+    if (!categoryRepository.existsById(id)) {
+      throw new NotFoundException("Категория не найдена");
+    }
     categoryRepository.deleteById(id);
   }
 
   public CategoryResponseDto getById(Long id) {
-    Category category = categoryRepository.findById(id)
+    return categoryRepository.findById(id)
+        .map(CategoryMapper::toDto)
         .orElseThrow(() -> new NotFoundException("Категория не найдена"));
-    return CategoryMapper.toDto(category);
   }
 
   public List<CategoryResponseDto> getAll() {
-    List<Category> categories = categoryRepository.findAll();
-    List<CategoryResponseDto> result = new ArrayList<>();
-    for (Category category : categories) {
-      result.add(CategoryMapper.toDto(category));
-    }
-    return result;
+    return categoryRepository.findAll().stream()
+        .map(CategoryMapper::toDto)
+        .toList();
   }
 
   public List<CategoryResponseDto> searchByName(String name) {

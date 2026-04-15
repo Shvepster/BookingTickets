@@ -22,14 +22,21 @@ public class UserService {
   @Transactional
   public UserResponseDto create(UserRequestDto dto) {
     if (userRepository.existsByEmail(dto.getEmail())) {
-      String msg = "Пользователь с email '" + dto.getEmail() + "' уже существует!";
-      throw new EmailAlreadyExistsException(msg);
+      throw new EmailAlreadyExistsException("Email уже занят!");
     }
     User user = new User();
     user.setUsername(dto.getUsername());
     user.setEmail(dto.getEmail());
-    User saved = userRepository.save(user);
-    return UserMapper.toDto(saved);
+    return UserMapper.toDto(userRepository.save(user));
+  }
+
+  @Transactional
+  public UserResponseDto update(Long id, UserRequestDto dto) {
+    User user = userRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
+    user.setUsername(dto.getUsername());
+    user.setEmail(dto.getEmail());
+    return UserMapper.toDto(userRepository.save(user));
   }
 
   @Transactional
@@ -44,8 +51,11 @@ public class UserService {
   }
 
   public List<UserResponseDto> getAll() {
-    return userRepository.findAll().stream()
-        .map(UserMapper::toDto)
-        .toList();
+    return userRepository.findAll().stream().map(UserMapper::toDto).toList();
+  }
+
+  public List<UserResponseDto> searchByUsername(String username) {
+    return userRepository.findByUsernameContainingIgnoreCase(username).stream()
+        .map(UserMapper::toDto).toList();
   }
 }

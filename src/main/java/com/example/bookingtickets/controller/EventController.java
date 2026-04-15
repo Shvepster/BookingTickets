@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -32,7 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/events")
 @RequiredArgsConstructor
 @Validated
-@Tag(name = "2. Мероприятия", description = "Афиша и поиск")
+@Tag(name = "2. Мероприятия", description = "Управление афишей")
 public class EventController {
 
   private final EventService eventService;
@@ -44,17 +45,11 @@ public class EventController {
   }
 
   @GetMapping("/search-complex")
-  @Operation(summary = "Сложный поиск (Блок 3)",
-      description = "Поиск по площадке и категории. Использует кэш.")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Успешно"),
-      @ApiResponse(responseCode = "400", description = "Ошибка параметров",
-          content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-  })
+  @Operation(summary = "Сложный поиск (Блок 3)")
   public Page<EventResponseDto> searchComplex(
       @RequestParam String venueName,
       @RequestParam String categoryName,
-      @Parameter(description = "Использовать Native SQL?")
+      @Parameter(description = "Использовать Native Query?")
       @RequestParam(defaultValue = "false") boolean useNative,
       Pageable pageable
   ) {
@@ -69,14 +64,23 @@ public class EventController {
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
-  @Operation(summary = "Создать мероприятие")
+  @Operation(summary = "Создать событие")
   public EventResponseDto create(@Valid @RequestBody EventRequestDto dto) {
     return eventService.create(dto);
   }
 
+  @PutMapping("/{id}")
+  @Operation(summary = "Обновить событие")
+  public EventResponseDto update(
+      @PathVariable @Positive Long id,
+      @Valid @RequestBody EventRequestDto dto
+  ) {
+    return eventService.update(id, dto);
+  }
+
   @DeleteMapping("/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  @Operation(summary = "Удалить мероприятие")
+  @Operation(summary = "Удалить событие")
   public void delete(@PathVariable @Positive Long id) {
     eventService.delete(id);
   }

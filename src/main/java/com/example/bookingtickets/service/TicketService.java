@@ -10,7 +10,6 @@ import com.example.bookingtickets.model.User;
 import com.example.bookingtickets.repository.EventRepository;
 import com.example.bookingtickets.repository.TicketRepository;
 import com.example.bookingtickets.repository.UserRepository;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,7 +24,8 @@ public class TicketService {
   private final UserRepository userRepository;
   private final EventRepository eventRepository;
 
-  private TicketResponseDto saveTicketInternal(TicketRequestDto dto) {
+  @Transactional
+  public TicketResponseDto create(TicketRequestDto dto) {
     User user = userRepository.findById(dto.getUserId())
         .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
     Event event = eventRepository.findById(dto.getEventId())
@@ -36,35 +36,14 @@ public class TicketService {
     ticket.setUser(user);
     ticket.setEvent(event);
 
-    Ticket saved = ticketRepository.save(ticket);
-    return TicketMapper.toDto(saved);
+    return TicketMapper.toDto(ticketRepository.save(ticket));
   }
 
   @Transactional
-  public TicketResponseDto update(Long id, TicketRequestDto dto) {
-    Ticket ticket = ticketRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Билет не найден"));
-    ticket.setSeatNumber(dto.getSeatNumber());
-
-    if (dto.getUserId() != null) {
-      User user = userRepository.findById(dto.getUserId())
-          .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
-      ticket.setUser(user);
+  public void createMultiple(List<TicketRequestDto> dtos) {
+    for (TicketRequestDto dto : dtos) {
+      create(dto);
     }
-
-    if (dto.getEventId() != null) {
-      Event event = eventRepository.findById(dto.getEventId())
-          .orElseThrow(() -> new NotFoundException("Мероприятие не найдено"));
-      ticket.setEvent(event);
-    }
-
-    Ticket saved = ticketRepository.save(ticket);
-    return TicketMapper.toDto(saved);
-  }
-
-  @Transactional
-  public void delete(Long id) {
-    ticketRepository.deleteById(id);
   }
 
   public TicketResponseDto getById(Long id) {
@@ -73,30 +52,17 @@ public class TicketService {
         .orElseThrow(() -> new NotFoundException("Билет не найден"));
   }
 
-  @Transactional
-  public TicketResponseDto create(TicketRequestDto dto) {
-    return saveTicketInternal(dto); // Вызываем приватный метод
-  }
-
   public List<TicketResponseDto> getAll() {
-    List<Ticket> tickets = ticketRepository.findAll();
-    List<TicketResponseDto> result = new ArrayList<>();
-    for (Ticket ticket : tickets) {
-      result.add(TicketMapper.toDto(ticket));
-    }
-    return result;
+    return ticketRepository.findAll().stream().map(TicketMapper::toDto).toList();
   }
 
   public List<TicketResponseDto> searchByUserId(Long userId) {
     return ticketRepository.findByUserId(userId).stream()
-        .map(TicketMapper::toDto)
-        .toList();
+        .map(TicketMapper::toDto).toList();
   }
 
   @Transactional
-  public void createMultiple(List<TicketRequestDto> dtos) {
-    for (TicketRequestDto dto : dtos) {
-      saveTicketInternal(dto);
-    }
+  public void delete(Long id) {
+    ticketRepository.deleteById(id);
   }
 }

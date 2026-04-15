@@ -6,7 +6,6 @@ import com.example.bookingtickets.exception.NotFoundException;
 import com.example.bookingtickets.mapper.VenueMapper;
 import com.example.bookingtickets.model.Venue;
 import com.example.bookingtickets.repository.VenueRepository;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,8 +23,7 @@ public class VenueService {
     Venue venue = new Venue();
     venue.setName(dto.getName());
     venue.setAddress(dto.getAddress());
-    Venue saved = venueRepository.save(venue);
-    return VenueMapper.toDto(saved);
+    return VenueMapper.toDto(venueRepository.save(venue));
   }
 
   @Transactional
@@ -34,8 +32,7 @@ public class VenueService {
         .orElseThrow(() -> new NotFoundException("Площадка не найдена"));
     venue.setName(dto.getName());
     venue.setAddress(dto.getAddress());
-    Venue saved = venueRepository.save(venue);
-    return VenueMapper.toDto(saved);
+    return VenueMapper.toDto(venueRepository.save(venue));
   }
 
   @Transactional
@@ -50,17 +47,11 @@ public class VenueService {
   }
 
   public List<VenueResponseDto> getAll() {
-    List<Venue> venues = venueRepository.findAll();
-    List<VenueResponseDto> result = new ArrayList<>();
-    for (Venue venue : venues) {
-      result.add(VenueMapper.toDto(venue));
-    }
-    return result;
+    return venueRepository.findAll().stream().map(VenueMapper::toDto).toList();
   }
 
   public List<VenueResponseDto> searchByName(String name) {
     return venueRepository.findByNameContainingIgnoreCase(name).stream()
-        .map(VenueMapper::toDto)
-        .toList();
+        .map(VenueMapper::toDto).toList();
   }
 }
