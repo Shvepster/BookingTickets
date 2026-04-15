@@ -2,6 +2,7 @@ package com.example.bookingtickets.service;
 
 import com.example.bookingtickets.dto.CategoryRequestDto;
 import com.example.bookingtickets.dto.CategoryResponseDto;
+import com.example.bookingtickets.exception.NotFoundException;
 import com.example.bookingtickets.mapper.CategoryMapper;
 import com.example.bookingtickets.model.Category;
 import com.example.bookingtickets.repository.CategoryRepository;
@@ -29,7 +30,7 @@ public class CategoryService {
   @Transactional
   public CategoryResponseDto update(Long id, CategoryRequestDto dto) {
     Category category = categoryRepository.findById(id)
-        .orElseThrow(() -> new IllegalArgumentException("Категория не найдена"));
+        .orElseThrow(() -> new NotFoundException("Категория не найдена"));
     category.setName(dto.getName());
     Category saved = categoryRepository.save(category);
     return CategoryMapper.toDto(saved);
@@ -42,7 +43,7 @@ public class CategoryService {
 
   public CategoryResponseDto getById(Long id) {
     Category category = categoryRepository.findById(id)
-        .orElseThrow(() -> new IllegalArgumentException("Категория не найдена"));
+        .orElseThrow(() -> new NotFoundException("Категория не найдена"));
     return CategoryMapper.toDto(category);
   }
 

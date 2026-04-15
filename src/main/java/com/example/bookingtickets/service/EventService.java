@@ -2,6 +2,7 @@ package com.example.bookingtickets.service;
 
 import com.example.bookingtickets.dto.EventRequestDto;
 import com.example.bookingtickets.dto.EventResponseDto;
+import com.example.bookingtickets.exception.NotFoundException;
 import com.example.bookingtickets.mapper.EventMapper;
 import com.example.bookingtickets.model.Category;
 import com.example.bookingtickets.model.Event;
@@ -46,14 +47,14 @@ public class EventService {
 
     if (dto.getVenueId() != null) {
       Venue venue = venueRepository.findById(dto.getVenueId())
-          .orElseThrow(() -> new IllegalArgumentException("Площадка не найдена"));
+          .orElseThrow(() -> new NotFoundException("Площадка не найдена"));
       event.setVenue(venue);
     }
 
     if (dto.getCategoryIds() != null && !dto.getCategoryIds().isEmpty()) {
       List<Category> categories = categoryRepository.findAllByIdIn(dto.getCategoryIds());
       if (categories.size() != dto.getCategoryIds().size()) {
-        throw new IllegalArgumentException("Некоторые категории не найдены");
+        throw new NotFoundException("Некоторые категории не найдены");
       }
       event.setCategories(new HashSet<>(categories));
     } else {
@@ -61,14 +62,14 @@ public class EventService {
     }
 
     Event saved = eventRepository.save(event);
-    invalidateCache(); // <-- СБРОС КЭША ПРИ СОЗДАНИИ
+    invalidateCache();
     return EventMapper.toDto(saved);
   }
 
   @Transactional
   public EventResponseDto update(Long id, EventRequestDto dto) {
     Event event = eventRepository.findById(id)
-        .orElseThrow(() -> new IllegalArgumentException("Мероприятие не найдено"));
+        .orElseThrow(() -> new NotFoundException("Мероприятие не найдено"));
 
     event.setTitle(dto.getTitle());
     event.setPrice(dto.getPrice());
@@ -76,7 +77,7 @@ public class EventService {
 
     if (dto.getVenueId() != null) {
       Venue venue = venueRepository.findById(dto.getVenueId())
-          .orElseThrow(() -> new IllegalArgumentException("Площадка не найдена"));
+          .orElseThrow(() -> new NotFoundException("Площадка не найдена"));
       event.setVenue(venue);
     } else {
       event.setVenue(null);
@@ -85,7 +86,7 @@ public class EventService {
     if (dto.getCategoryIds() != null && !dto.getCategoryIds().isEmpty()) {
       List<Category> categories = categoryRepository.findAllByIdIn(dto.getCategoryIds());
       if (categories.size() != dto.getCategoryIds().size()) {
-        throw new IllegalArgumentException("Некоторые категории не найдены");
+        throw new NotFoundException("Некоторые категории не найдены");
       }
       event.setCategories(new HashSet<>(categories));
     } else {
@@ -106,7 +107,7 @@ public class EventService {
   public EventResponseDto getById(Long id) {
     return eventRepository.findById(id)
         .map(EventMapper::toDto)
-        .orElseThrow(() -> new IllegalArgumentException("Мероприятие не найдено"));
+        .orElseThrow(() -> new NotFoundException("Мероприятие не найдено"));
   }
 
   public List<EventResponseDto> getAll() {

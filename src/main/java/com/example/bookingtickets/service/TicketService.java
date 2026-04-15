@@ -2,6 +2,7 @@ package com.example.bookingtickets.service;
 
 import com.example.bookingtickets.dto.TicketRequestDto;
 import com.example.bookingtickets.dto.TicketResponseDto;
+import com.example.bookingtickets.exception.NotFoundException;
 import com.example.bookingtickets.mapper.TicketMapper;
 import com.example.bookingtickets.model.Event;
 import com.example.bookingtickets.model.Ticket;
@@ -26,9 +27,9 @@ public class TicketService {
 
   private TicketResponseDto saveTicketInternal(TicketRequestDto dto) {
     User user = userRepository.findById(dto.getUserId())
-        .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
+        .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
     Event event = eventRepository.findById(dto.getEventId())
-        .orElseThrow(() -> new IllegalArgumentException("Мероприятие не найдено"));
+        .orElseThrow(() -> new NotFoundException("Мероприятие не найдено"));
 
     Ticket ticket = new Ticket();
     ticket.setSeatNumber(dto.getSeatNumber());
@@ -42,18 +43,18 @@ public class TicketService {
   @Transactional
   public TicketResponseDto update(Long id, TicketRequestDto dto) {
     Ticket ticket = ticketRepository.findById(id)
-        .orElseThrow(() -> new IllegalArgumentException("Билет не найден"));
+        .orElseThrow(() -> new NotFoundException("Билет не найден"));
     ticket.setSeatNumber(dto.getSeatNumber());
 
     if (dto.getUserId() != null) {
       User user = userRepository.findById(dto.getUserId())
-          .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
+          .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
       ticket.setUser(user);
     }
 
     if (dto.getEventId() != null) {
       Event event = eventRepository.findById(dto.getEventId())
-          .orElseThrow(() -> new IllegalArgumentException("Мероприятие не найдено"));
+          .orElseThrow(() -> new NotFoundException("Мероприятие не найдено"));
       ticket.setEvent(event);
     }
 
@@ -69,7 +70,7 @@ public class TicketService {
   public TicketResponseDto getById(Long id) {
     return ticketRepository.findById(id)
         .map(TicketMapper::toDto)
-        .orElseThrow(() -> new IllegalArgumentException("Билет не найден"));
+        .orElseThrow(() -> new NotFoundException("Билет не найден"));
   }
 
   @Transactional

@@ -2,6 +2,8 @@ package com.example.bookingtickets.service;
 
 import com.example.bookingtickets.dto.UserRequestDto;
 import com.example.bookingtickets.dto.UserResponseDto;
+import com.example.bookingtickets.exception.EmailAlreadyExistsException;
+import com.example.bookingtickets.exception.NotFoundException;
 import com.example.bookingtickets.mapper.UserMapper;
 import com.example.bookingtickets.model.User;
 import com.example.bookingtickets.repository.UserRepository;
@@ -20,6 +22,9 @@ public class UserService {
 
   @Transactional
   public UserResponseDto create(UserRequestDto dto) {
+    if (userRepository.existsByEmail(dto.getEmail())) {
+      throw new EmailAlreadyExistsException("Пользователь с email '" + dto.getEmail() + "' уже существует!");
+    }
     User user = new User();
     user.setUsername(dto.getUsername());
     user.setEmail(dto.getEmail());
@@ -30,7 +35,7 @@ public class UserService {
   @Transactional
   public UserResponseDto update(Long id, UserRequestDto dto) {
     User user = userRepository.findById(id)
-        .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
+        .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
     user.setUsername(dto.getUsername());
     user.setEmail(dto.getEmail());
     User saved = userRepository.save(user);
@@ -45,7 +50,7 @@ public class UserService {
   public UserResponseDto getById(Long id) {
     return userRepository.findById(id)
         .map(UserMapper::toDto)
-        .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
+        .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
   }
 
   public List<UserResponseDto> getAll() {

@@ -2,63 +2,54 @@ package com.example.bookingtickets.controller;
 
 import com.example.bookingtickets.dto.TicketRequestDto;
 import com.example.bookingtickets.dto.TicketResponseDto;
+import com.example.bookingtickets.exception.ErrorResponse;
 import com.example.bookingtickets.service.TicketService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/tickets")
 @RequiredArgsConstructor
+@Validated
+@Tag(name = "Билеты", description = "Бронирование и покупка билетов")
 public class TicketController {
 
   private final TicketService ticketService;
 
-  @GetMapping
-  public List<TicketResponseDto> getAll() {
-    return ticketService.getAll();
-  }
-
-  @GetMapping("/{id}")
-  public TicketResponseDto getById(@PathVariable Long id) {
-    return ticketService.getById(id);
-  }
-
-  @GetMapping("/search")
-  public List<TicketResponseDto> search(@RequestParam Long userId) {
-    return ticketService.searchByUserId(userId);
-  }
-
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
-  public TicketResponseDto create(@RequestBody TicketRequestDto dto) {
+  @Operation(summary = "Купить одиночный билет")
+  public TicketResponseDto create(@Valid @RequestBody TicketRequestDto dto) {
     return ticketService.create(dto);
-  }
-
-  @PutMapping("/{id}")
-  public TicketResponseDto update(@PathVariable Long id, @RequestBody TicketRequestDto dto) {
-    return ticketService.update(id, dto);
-  }
-
-  @DeleteMapping("/{id}")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void delete(@PathVariable Long id) {
-    ticketService.delete(id);
   }
 
   @PostMapping("/bulk")
   @ResponseStatus(HttpStatus.CREATED)
-  public void createBulk(@RequestBody List<TicketRequestDto> dtos) {
+  @Operation(summary = "Массовая покупка (Транзакционно)", description = "Откатывает всё при ошибке любого билета")
+  @ApiResponses({
+      @ApiResponse(responseCode = "201", description = "Все билеты куплены"),
+      @ApiResponse(responseCode = "400", description = "Ошибка в данных"),
+      @ApiResponse(responseCode = "404", description = "Пользователь или событие не найдены")
+  })
+  public void createBulk(@RequestBody List<@Valid TicketRequestDto> dtos) {
     ticketService.createMultiple(dtos);
+  }
+
+  @DeleteMapping("/{id}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @Operation(summary = "Отменить бронь")
+  public void delete(@PathVariable @Positive Long id) {
+    ticketService.delete(id);
   }
 }

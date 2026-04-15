@@ -2,6 +2,7 @@ package com.example.bookingtickets.service;
 
 import com.example.bookingtickets.dto.VenueRequestDto;
 import com.example.bookingtickets.dto.VenueResponseDto;
+import com.example.bookingtickets.exception.NotFoundException;
 import com.example.bookingtickets.mapper.VenueMapper;
 import com.example.bookingtickets.model.Venue;
 import com.example.bookingtickets.repository.VenueRepository;
@@ -30,7 +31,7 @@ public class VenueService {
   @Transactional
   public VenueResponseDto update(Long id, VenueRequestDto dto) {
     Venue venue = venueRepository.findById(id)
-        .orElseThrow(() -> new IllegalArgumentException("Площадка не найдена"));
+        .orElseThrow(() -> new NotFoundException("Площадка не найдена"));
     venue.setName(dto.getName());
     venue.setAddress(dto.getAddress());
     Venue saved = venueRepository.save(venue);
@@ -45,7 +46,7 @@ public class VenueService {
   public VenueResponseDto getById(Long id) {
     return venueRepository.findById(id)
         .map(VenueMapper::toDto)
-        .orElseThrow(() -> new IllegalArgumentException("Площадка не найдена"));
+        .orElseThrow(() -> new NotFoundException("Площадка не найдена"));
   }
 
   public List<VenueResponseDto> getAll() {
