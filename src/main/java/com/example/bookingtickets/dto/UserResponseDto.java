@@ -7,20 +7,19 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Данные профиля пользователя в ответе")
+@NoArgsConstructor
+@Schema(description = "Ответ с профилем пользователя")
 public class UserResponseDto {
-
-  @Schema(description = "Уникальный ID пользователя", example = "1")
+  @Schema(description = "ID пользователя", example = "1")
   private Long id;
 
   @Schema(description = "Имя пользователя", example = "ivan_ivanov")
   private String username;
 
-  @Schema(description = "Электронная почта", example = "ivan@example.com")
+  @Schema(description = "Email", example = "ivan@example.com")
   private String email;
 
-  @Schema(description = "Список ID всех билетов пользователя")
+  @Schema(description = "Список ID билетов пользователя", example = "[10, 11, 12]")
   private List<Long> ticketIds;
 }

@@ -7,7 +7,6 @@ import com.example.bookingtickets.exception.NotFoundException;
 import com.example.bookingtickets.mapper.UserMapper;
 import com.example.bookingtickets.model.User;
 import com.example.bookingtickets.repository.UserRepository;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,19 +22,10 @@ public class UserService {
   @Transactional
   public UserResponseDto create(UserRequestDto dto) {
     if (userRepository.existsByEmail(dto.getEmail())) {
-      throw new EmailAlreadyExistsException("Пользователь с email '" + dto.getEmail() + "' уже существует!");
+      String msg = "Пользователь с email '" + dto.getEmail() + "' уже существует!";
+      throw new EmailAlreadyExistsException(msg);
     }
     User user = new User();
-    user.setUsername(dto.getUsername());
-    user.setEmail(dto.getEmail());
-    User saved = userRepository.save(user);
-    return UserMapper.toDto(saved);
-  }
-
-  @Transactional
-  public UserResponseDto update(Long id, UserRequestDto dto) {
-    User user = userRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
     user.setUsername(dto.getUsername());
     user.setEmail(dto.getEmail());
     User saved = userRepository.save(user);
@@ -54,16 +44,7 @@ public class UserService {
   }
 
   public List<UserResponseDto> getAll() {
-    List<User> users = userRepository.findAll();
-    List<UserResponseDto> result = new ArrayList<>();
-    for (User user : users) {
-      result.add(UserMapper.toDto(user));
-    }
-    return result;
-  }
-
-  public List<UserResponseDto> searchByUsername(String username) {
-    return userRepository.findByUsernameContainingIgnoreCase(username).stream()
+    return userRepository.findAll().stream()
         .map(UserMapper::toDto)
         .toList();
   }

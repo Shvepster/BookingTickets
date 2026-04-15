@@ -7,20 +7,19 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Информация о площадке в ответе")
+@NoArgsConstructor
+@Schema(description = "Ответ с данными площадки")
 public class VenueResponseDto {
-
-  @Schema(description = "Уникальный ID площадки", example = "1")
+  @Schema(description = "ID площадки", example = "1")
   private Long id;
 
-  @Schema(description = "Название площадки", example = "Минск-Арена")
+  @Schema(description = "Название", example = "Минск-Арена")
   private String name;
 
-  @Schema(description = "Адрес", example = "пр. Победителей, 111")
+  @Schema(description = "Адрес", example = "пр. Победителей 111")
   private String address;
 
-  @Schema(description = "Список ID мероприятий на этой площадке")
+  @Schema(description = "Список ID запланированных мероприятий", example = "[1, 5, 8]")
   private List<Long> eventIds;
 }

@@ -17,24 +17,19 @@ import lombok.NoArgsConstructor;
 @Schema(description = "Данные для создания мероприятия")
 public class EventRequestDto {
 
-  @Schema(description = "Заголовок мероприятия", example = "Концерт группы Scorpions")
-  @NotBlank(message = "Название мероприятия не может быть пустым")
+  @NotBlank(message = "Название не может быть пустым")
   private String title;
 
-  @Schema(description = "Цена билета", example = "150.0")
-  @NotNull(message = "Цена должна быть указана")
-  @Positive(message = "Цена должна быть больше нуля")
+  @NotNull(message = "Цена обязательна")
+  @Positive(message = "Цена должна быть > 0")
   private Double price;
 
-  @Schema(description = "ID площадки проведения", example = "1")
-  @NotNull(message = "ID площадки должен быть указан")
+  @NotNull(message = "ID площадки обязателен")
   private Long venueId;
 
-  @Schema(description = "Список ID категорий", example = "[1, 3]")
   private List<Long> categoryIds;
 
-  @Schema(description = "Дата и время начала", example = "2026-12-31T20:00:00")
-  @NotNull(message = "Дата мероприятия должна быть указана")
-  @Future(message = "Мероприятие не может быть в прошлом")
+  @NotNull(message = "Дата обязательна")
+  @Future(message = "Дата должна быть в будущем")
   private LocalDateTime eventDate;
 }

@@ -3,6 +3,7 @@ package com.example.bookingtickets.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,12 +14,13 @@ import lombok.NoArgsConstructor;
 @Schema(description = "Данные для регистрации пользователя")
 public class UserRequestDto {
 
-  @Schema(description = "Уникальное имя пользователя", example = "ivan_ivanov")
-  @NotBlank(message = "Имя пользователя не должно быть пустым")
+  @Schema(description = "Имя пользователя", example = "ivan_ivanov")
+  @NotBlank(message = "Имя пользователя не может быть пустым")
+  @Size(min = 3, max = 20, message = "Имя должно быть от 3 до 20 символов")
   private String username;
 
   @Schema(description = "Электронная почта", example = "ivan@example.com")
-  @NotBlank(message = "Email не должен быть пустым")
-  @Email(message = "Некорректный формат email адреса")
+  @NotBlank(message = "Email не может быть пустым")
+  @Email(message = "Некорректный формат email")
   private String email;
 }

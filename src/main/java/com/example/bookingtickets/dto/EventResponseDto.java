@@ -9,27 +9,26 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Полная информация о мероприятии в ответе")
+@NoArgsConstructor
+@Schema(description = "Ответ с данными мероприятия")
 public class EventResponseDto {
-
   @Schema(description = "ID мероприятия", example = "1")
   private Long id;
 
   @Schema(description = "Заголовок", example = "Концерт Scorpions")
   private String title;
 
-  @Schema(description = "Цена с указанием валюты", example = "150.0 BYN")
+  @Schema(description = "Форматированная цена", example = "150.0 BYN")
   private String formattedPrice;
 
-  @Schema(description = "Название площадки проведения", example = "Минск-Арена")
+  @Schema(description = "Название площадки", example = "Минск-Арена")
   private String venueName;
 
-  @Schema(description = "Дата и время начала", example = "2026-03-29 12:45")
+  @Schema(description = "Дата проведения", example = "2025-12-31 20:00")
   @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
   private LocalDateTime eventDate;
 
-  @Schema(description = "Список названий категорий", example = "[\"Рок\", \"Шоу\"]")
+  @Schema(description = "Список категорий", example = "[\"Рок\", \"Шоу\"]")
   private List<String> categories;
 }

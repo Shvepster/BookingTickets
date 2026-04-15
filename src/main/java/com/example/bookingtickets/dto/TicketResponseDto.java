@@ -6,20 +6,19 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Информация о купленном билете в ответе")
+@NoArgsConstructor
+@Schema(description = "Ответ с данными купленного билета")
 public class TicketResponseDto {
-
-  @Schema(description = "ID билета", example = "10")
+  @Schema(description = "ID билета", example = "123")
   private Long id;
 
-  @Schema(description = "Место в зале", example = "Ряд 5, место 12")
+  @Schema(description = "Место", example = "Ряд 5, место 10")
   private String seatNumber;
 
-  @Schema(description = "Имя владельца билета", example = "admin")
+  @Schema(description = "Имя владельца", example = "ivan_ivanov")
   private String username;
 
-  @Schema(description = "Название мероприятия", example = "Концерт Scorpions")
+  @Schema(description = "Название события", example = "Концерт Scorpions")
   private String eventTitle;
 }

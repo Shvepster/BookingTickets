@@ -6,12 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Информация о категории в ответе")
+@NoArgsConstructor
+@Schema(description = "Ответ с данными категории")
 public class CategoryResponseDto {
-
-  @Schema(description = "Уникальный ID", example = "1")
+  @Schema(description = "ID категории", example = "1")
   private Long id;
 
   @Schema(description = "Название категории", example = "Рок-музыка")

@@ -9,14 +9,14 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Данные для создания или обновления площадки")
+@Schema(description = "Данные для создания площадки")
 public class VenueRequestDto {
 
   @Schema(description = "Название площадки", example = "Минск-Арена")
   @NotBlank(message = "Название площадки не может быть пустым")
   private String name;
 
-  @Schema(description = "Физический адрес", example = "пр. Победителей, 111")
+  @Schema(description = "Адрес", example = "пр. Победителей 111")
   @NotBlank(message = "Адрес не может быть пустым")
   private String address;
 }

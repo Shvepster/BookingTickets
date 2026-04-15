@@ -13,15 +13,15 @@ import lombok.NoArgsConstructor;
 @Schema(description = "Данные для покупки билета")
 public class TicketRequestDto {
 
-  @Schema(description = "Номер места или сектора", example = "Сектор А, ряд 10, место 5")
-  @NotBlank(message = "Номер места должен быть указан")
+  @Schema(description = "Номер места", example = "Ряд 5, место 10")
+  @NotBlank(message = "Место должно быть указано")
   private String seatNumber;
 
-  @Schema(description = "ID покупателя", example = "1")
-  @NotNull(message = "ID пользователя должен быть указан")
+  @Schema(description = "ID пользователя", example = "1")
+  @NotNull(message = "ID пользователя обязателен")
   private Long userId;
 
   @Schema(description = "ID мероприятия", example = "1")
-  @NotNull(message = "ID мероприятия должен быть указан")
+  @NotNull(message = "ID мероприятия обязателен")
   private Long eventId;
 }
