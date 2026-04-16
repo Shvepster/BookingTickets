@@ -71,6 +71,20 @@ public class GlobalExceptionHandler {
     return buildResponse(HttpStatus.BAD_REQUEST, "Ошибка параметров", request, errors);
   }
 
+  @ExceptionHandler(Exception.class)
+  public ResponseEntity<ErrorResponse> handleAllExceptions(
+      Exception exception,
+      HttpServletRequest request
+  ) {
+    log.error("Непредвиденная ошибка сервера на {}: {}", request.getRequestURI(), exception.getMessage(), exception);
+    return buildResponse(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Внутренняя ошибка сервера",
+        request,
+        List.of(exception.getMessage() != null ? exception.getMessage() : "Неизвестная ошибка")
+    );
+  }
+
   private ResponseEntity<ErrorResponse> buildResponse(
       HttpStatus status,
       String message,

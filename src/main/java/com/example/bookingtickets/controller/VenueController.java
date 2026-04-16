@@ -2,8 +2,13 @@ package com.example.bookingtickets.controller;
 
 import com.example.bookingtickets.dto.VenueRequestDto;
 import com.example.bookingtickets.dto.VenueResponseDto;
+import com.example.bookingtickets.exception.ErrorResponse;
 import com.example.bookingtickets.service.VenueService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -38,6 +43,11 @@ public class VenueController {
 
   @GetMapping("/{id}")
   @Operation(summary = "Площадка по ID")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "Успешно"),
+      @ApiResponse(responseCode = "404", description = "Площадка не найдена",
+          content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
   public VenueResponseDto getById(@PathVariable @Positive Long id) {
     return venueService.getById(id);
   }
@@ -45,12 +55,24 @@ public class VenueController {
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   @Operation(summary = "Создать площадку")
+  @ApiResponses({
+      @ApiResponse(responseCode = "201", description = "Создана"),
+      @ApiResponse(responseCode = "400", description = "Ошибка валидации",
+          content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
   public VenueResponseDto create(@Valid @RequestBody VenueRequestDto dto) {
     return venueService.create(dto);
   }
 
   @PutMapping("/{id}")
   @Operation(summary = "Обновить площадку")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "Обновлено"),
+      @ApiResponse(responseCode = "400", description = "Ошибка валидации",
+          content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+      @ApiResponse(responseCode = "404", description = "Площадка не найдена",
+          content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
   public VenueResponseDto update(
       @PathVariable @Positive Long id,
       @Valid @RequestBody VenueRequestDto dto
@@ -61,6 +83,11 @@ public class VenueController {
   @DeleteMapping("/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @Operation(summary = "Удалить площадку")
+  @ApiResponses({
+      @ApiResponse(responseCode = "204", description = "Удалено"),
+      @ApiResponse(responseCode = "404", description = "Площадка не найдена",
+          content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
   public void delete(@PathVariable @Positive Long id) {
     venueService.delete(id);
   }

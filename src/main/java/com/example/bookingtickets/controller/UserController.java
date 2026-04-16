@@ -43,6 +43,11 @@ public class UserController {
 
   @GetMapping("/{id}")
   @Operation(summary = "Пользователь по ID")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "Успешно"),
+      @ApiResponse(responseCode = "404", description = "Пользователь не найден",
+          content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
   public UserResponseDto getById(@PathVariable @Positive Long id) {
     return userService.getById(id);
   }
@@ -52,6 +57,8 @@ public class UserController {
   @Operation(summary = "Регистрация")
   @ApiResponses({
       @ApiResponse(responseCode = "201", description = "Создан"),
+      @ApiResponse(responseCode = "400", description = "Ошибка валидации",
+          content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
       @ApiResponse(responseCode = "409", description = "Email занят",
           content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   })
@@ -61,6 +68,13 @@ public class UserController {
 
   @PutMapping("/{id}")
   @Operation(summary = "Обновить профиль")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "Обновлено"),
+      @ApiResponse(responseCode = "400", description = "Ошибка валидации",
+          content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+      @ApiResponse(responseCode = "404", description = "Пользователь не найден",
+          content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
   public UserResponseDto update(
       @PathVariable @Positive Long id,
       @Valid @RequestBody UserRequestDto dto
@@ -71,6 +85,11 @@ public class UserController {
   @DeleteMapping("/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @Operation(summary = "Удалить профиль")
+  @ApiResponses({
+      @ApiResponse(responseCode = "204", description = "Удалено"),
+      @ApiResponse(responseCode = "404", description = "Пользователь не найден",
+          content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
   public void delete(@PathVariable @Positive Long id) {
     userService.delete(id);
   }

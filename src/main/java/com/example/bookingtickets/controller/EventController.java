@@ -58,6 +58,11 @@ public class EventController {
 
   @GetMapping("/{id}")
   @Operation(summary = "Событие по ID")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "Успешно"),
+      @ApiResponse(responseCode = "404", description = "Мероприятие не найдено",
+          content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
   public EventResponseDto getById(@PathVariable @Positive Long id) {
     return eventService.getById(id);
   }
@@ -65,12 +70,26 @@ public class EventController {
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   @Operation(summary = "Создать событие")
+  @ApiResponses({
+      @ApiResponse(responseCode = "201", description = "Создано"),
+      @ApiResponse(responseCode = "400", description = "Ошибка валидации данных",
+          content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+      @ApiResponse(responseCode = "404", description = "Указанная площадка не найдена",
+          content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
   public EventResponseDto create(@Valid @RequestBody EventRequestDto dto) {
     return eventService.create(dto);
   }
 
   @PutMapping("/{id}")
   @Operation(summary = "Обновить событие")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "Обновлено"),
+      @ApiResponse(responseCode = "400", description = "Ошибка валидации",
+          content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+      @ApiResponse(responseCode = "404", description = "Мероприятие не найдено",
+          content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
   public EventResponseDto update(
       @PathVariable @Positive Long id,
       @Valid @RequestBody EventRequestDto dto

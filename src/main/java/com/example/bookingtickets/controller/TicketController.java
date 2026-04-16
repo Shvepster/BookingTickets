@@ -37,6 +37,13 @@ public class TicketController {
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   @Operation(summary = "Купить билет")
+  @ApiResponses({
+      @ApiResponse(responseCode = "201", description = "Билет куплен"),
+      @ApiResponse(responseCode = "400", description = "Ошибка валидации",
+          content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+      @ApiResponse(responseCode = "404", description = "Пользователь или мероприятие не найдены",
+          content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
   public TicketResponseDto create(@Valid @RequestBody TicketRequestDto dto) {
     return ticketService.create(dto);
   }
@@ -47,6 +54,8 @@ public class TicketController {
   @ApiResponses({
       @ApiResponse(responseCode = "201", description = "Успешно"),
       @ApiResponse(responseCode = "400", description = "Ошибка валидации",
+          content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+      @ApiResponse(responseCode = "404", description = "Один из пользователей или событий не найден",
           content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   })
   public void createBulk(@RequestBody List<@Valid TicketRequestDto> dtos) {
@@ -55,6 +64,11 @@ public class TicketController {
 
   @GetMapping("/{id}")
   @Operation(summary = "Инфо о билете")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "Успешно"),
+      @ApiResponse(responseCode = "404", description = "Билет не найден",
+          content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
   public TicketResponseDto getById(@PathVariable @Positive Long id) {
     return ticketService.getById(id);
   }
@@ -62,6 +76,11 @@ public class TicketController {
   @DeleteMapping("/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @Operation(summary = "Вернуть билет")
+  @ApiResponses({
+      @ApiResponse(responseCode = "204", description = "Удалено"),
+      @ApiResponse(responseCode = "404", description = "Билет не найден",
+          content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
   public void delete(@PathVariable @Positive Long id) {
     ticketService.delete(id);
   }
