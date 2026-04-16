@@ -99,7 +99,13 @@ public class EventService {
       String venue, String cat, Pageable page, boolean useNative) {
 
     EventSearchKey key = new EventSearchKey(
-        venue, cat, page.getPageNumber(), page.getPageSize(), useNative);
+        venue,
+        cat,
+        page.getPageNumber(),
+        page.getPageSize(),
+        page.getSort().toString(),
+        useNative
+    );
 
     if (eventCache.containsKey(key)) {
       log.info("Возврат из кэша для: {}", key);

@@ -5,6 +5,7 @@ public record EventSearchKey(
     String categoryName,
     int page,
     int size,
+    String sort,
     boolean useNative
 ) {
 }
