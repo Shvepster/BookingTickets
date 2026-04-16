@@ -32,6 +32,9 @@ public class GlobalExceptionHandler {
         })
         .toList();
 
+    // Добавлено логирование для демонстрации на защите
+    log.warn("Ошибка валидации для запроса {}: {}", request.getRequestURI(), errors);
+
     return buildResponse(HttpStatus.BAD_REQUEST, "Ошибка валидации", request, errors);
   }
 
@@ -40,6 +43,7 @@ public class GlobalExceptionHandler {
       NotFoundException exception,
       HttpServletRequest request
   ) {
+    log.warn("Ресурс не найден: {}", exception.getMessage());
     return buildResponse(HttpStatus.NOT_FOUND, exception.getMessage(), request,
         List.of(exception.getMessage()));
   }
@@ -49,7 +53,9 @@ public class GlobalExceptionHandler {
       EmailAlreadyExistsException exception,
       HttpServletRequest request
   ) {
-    log.warn("Конфликт данных: {}", exception.getMessage());
+    // Добавлено явное логирование WARN для демонстрации
+    log.warn("Конфликт данных (409) на {}: {}", request.getRequestURI(), exception.getMessage());
+
     return buildResponse(
         HttpStatus.CONFLICT,
         "Конфликт данных",
@@ -68,6 +74,8 @@ public class GlobalExceptionHandler {
         .map(v -> v.getPropertyPath() + ": " + v.getMessage())
         .toList();
 
+    log.warn("Ошибка параметров запроса: {}", errors);
+
     return buildResponse(HttpStatus.BAD_REQUEST, "Ошибка параметров", request, errors);
   }
 
@@ -76,7 +84,8 @@ public class GlobalExceptionHandler {
       Exception exception,
       HttpServletRequest request
   ) {
-    log.error("Непредвиденная ошибка сервера на {}: {}", request.getRequestURI(), exception.getMessage(), exception);
+    log.error("КРИТИЧЕСКАЯ ОШИБКА на {}: {}", request.getRequestURI(), exception.getMessage(), exception);
+
     return buildResponse(
         HttpStatus.INTERNAL_SERVER_ERROR,
         "Внутренняя ошибка сервера",
