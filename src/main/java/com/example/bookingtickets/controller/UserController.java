@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 @Validated
-@Tag(name = "4. Пользователи", description = "Управление профилями клиентов")
+@Tag(name = "Пользователи", description = "Управление профилями клиентов")
 public class UserController {
 
   private final UserService userService;

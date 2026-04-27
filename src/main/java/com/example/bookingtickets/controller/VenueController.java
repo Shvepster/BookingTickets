@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/venues")
 @RequiredArgsConstructor
 @Validated
-@Tag(name = "5. Площадки", description = "Управление площадками")
+@Tag(name = "Площадки", description = "Управление площадками")
 public class VenueController {
 
   private final VenueService venueService;

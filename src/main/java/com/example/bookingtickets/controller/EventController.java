@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/events")
 @RequiredArgsConstructor
 @Validated
-@Tag(name = "2. Мероприятия", description = "Управление афишей")
+@Tag(name = "Мероприятия", description = "Управление афишей")
 public class EventController {
 
   private final EventService eventService;

@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/tickets")
 @RequiredArgsConstructor
 @Validated
-@Tag(name = "3. Билеты", description = "Покупка билетов")
+@Tag(name = "Билеты", description = "Покупка билетов")
 public class TicketController {
 
   private final TicketService ticketService;
@@ -50,7 +50,7 @@ public class TicketController {
 
   @PostMapping("/bulk")
   @ResponseStatus(HttpStatus.CREATED)
-  @Operation(summary = "Массовая покупка (Блок 5)")
+  @Operation(summary = "Массовая покупка")
   @ApiResponses({
       @ApiResponse(responseCode = "201", description = "Успешно"),
       @ApiResponse(responseCode = "400", description = "Ошибка валидации",
