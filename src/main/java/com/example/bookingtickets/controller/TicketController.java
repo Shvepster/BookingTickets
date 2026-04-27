@@ -55,7 +55,8 @@ public class TicketController {
       @ApiResponse(responseCode = "201", description = "Успешно"),
       @ApiResponse(responseCode = "400", description = "Ошибка валидации",
           content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-      @ApiResponse(responseCode = "404", description = "Один из пользователей или событий не найден",
+      @ApiResponse(responseCode = "404", description = "Один из пользователей или "
+          + "событий не найден",
           content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   })
   public void createBulk(@RequestBody List<@Valid TicketRequestDto> dtos) {

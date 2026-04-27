@@ -84,7 +84,8 @@ public class GlobalExceptionHandler {
       Exception exception,
       HttpServletRequest request
   ) {
-    log.error("КРИТИЧЕСКАЯ ОШИБКА на {}: {}", request.getRequestURI(), exception.getMessage(), exception);
+    log.error("КРИТИЧЕСКАЯ ОШИБКА на {}: {}", request.getRequestURI(),
+        exception.getMessage(), exception);
 
     return buildResponse(
         HttpStatus.INTERNAL_SERVER_ERROR,
