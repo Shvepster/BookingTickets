@@ -27,7 +27,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
 @ExtendWith(MockitoExtension.class)
-public class EventServiceTest {
+class EventServiceTest {
 
   @Mock private EventRepository eventRepository;
   @Mock private VenueRepository venueRepository;
@@ -61,7 +61,7 @@ public class EventServiceTest {
   }
 
   @Test
-  void create_WithoutCategories_Success() { // Покрывает ветку if(categoryIds == null)
+  void create_WithoutCategories_Success() {
     when(venueRepository.findById(1L)).thenReturn(Optional.of(new Venue()));
     when(eventRepository.save(any())).thenReturn(event);
 
@@ -107,7 +107,7 @@ public class EventServiceTest {
   @Test
   void delete_Success() {
     eventService.delete(1L);
-    verify(eventRepository).deleteById(1L); // А также проверяет инвалидацию кэша!
+    verify(eventRepository).deleteById(1L);
   }
 
   @Test
