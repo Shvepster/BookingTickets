@@ -150,4 +150,17 @@ class EventServiceTest {
 
     verify(eventRepository, times(1)).findComplexByNative(any(), any(), any());
   }
+
+  @Test
+  void create_WithEmptyCategoriesList_Success() {
+    EventRequestDto emptyCatDto = new EventRequestDto("Concert", 100.0, 1L, List.of(), LocalDateTime.now());
+
+    when(venueRepository.findById(1L)).thenReturn(Optional.of(new Venue()));
+    when(eventRepository.save(any())).thenReturn(event);
+
+    eventService.create(emptyCatDto);
+
+    verify(categoryRepository, never()).findAllByIdIn(any());
+    verify(eventRepository).save(any());
+  }
 }
