@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,8 +39,22 @@ public class UserController {
 
   @GetMapping
   @Operation(summary = "Список всех пользователей")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "Успешно")
+  })
   public List<UserResponseDto> getAll() {
     return userService.getAll();
+  }
+
+  @GetMapping("/search")
+  @Operation(summary = "Поиск по имени пользователя")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "Успешно"),
+      @ApiResponse(responseCode = "400", description = "Ошибка валидации параметров",
+          content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
+  public List<UserResponseDto> search(@RequestParam @NotBlank String username) {
+    return userService.searchByUsername(username);
   }
 
   @GetMapping("/{id}")

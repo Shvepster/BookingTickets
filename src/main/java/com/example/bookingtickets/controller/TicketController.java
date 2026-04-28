@@ -36,8 +36,22 @@ public class TicketController {
 
   @GetMapping
   @Operation(summary = "Список всех купленных билетов")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "Успешно")
+  })
   public List<TicketResponseDto> getAll() {
     return ticketService.getAll();
+  }
+
+  @GetMapping("/user/{userId}")
+  @Operation(summary = "Список билетов пользователя")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "Успешно"),
+      @ApiResponse(responseCode = "400", description = "Некорректный ID",
+          content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
+  public List<TicketResponseDto> getByUserId(@PathVariable @Positive Long userId) {
+    return ticketService.searchByUserId(userId);
   }
 
   @PostMapping
@@ -61,8 +75,7 @@ public class TicketController {
       @ApiResponse(responseCode = "201", description = "Успешно"),
       @ApiResponse(responseCode = "400", description = "Ошибка валидации",
           content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-      @ApiResponse(responseCode = "404", description = "Один из пользователей или "
-          + "событий не найден",
+      @ApiResponse(responseCode = "404", description = "Один из пользователей или событий не найден",
           content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   })
   public void createBulk(@RequestBody List<@Valid TicketRequestDto> dtos) {

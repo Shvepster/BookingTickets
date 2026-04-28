@@ -39,6 +39,9 @@ public class CategoryController {
 
   @GetMapping
   @Operation(summary = "Все категории")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "Успешно")
+  })
   public List<CategoryResponseDto> getAll() {
     return categoryService.getAll();
   }
@@ -56,6 +59,11 @@ public class CategoryController {
 
   @GetMapping("/search")
   @Operation(summary = "Поиск по названию")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "Успешно"),
+      @ApiResponse(responseCode = "400", description = "Ошибка валидации параметров",
+          content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
   public List<CategoryResponseDto> search(@RequestParam @NotBlank String name) {
     return categoryService.searchByName(name);
   }

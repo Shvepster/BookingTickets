@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,8 +39,22 @@ public class VenueController {
 
   @GetMapping
   @Operation(summary = "Все площадки")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "Успешно")
+  })
   public List<VenueResponseDto> getAll() {
     return venueService.getAll();
+  }
+
+  @GetMapping("/search")
+  @Operation(summary = "Поиск по названию")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "Успешно"),
+      @ApiResponse(responseCode = "400", description = "Ошибка валидации параметров",
+          content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
+  public List<VenueResponseDto> search(@RequestParam @NotBlank String name) {
+    return venueService.searchByName(name);
   }
 
   @GetMapping("/{id}")
