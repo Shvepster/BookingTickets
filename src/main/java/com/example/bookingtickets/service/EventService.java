@@ -34,7 +34,7 @@ public class EventService {
   private final Map<EventSearchKey, Page<EventResponseDto>> eventCache = new HashMap<>();
 
   private void invalidateCache() {
-    log.info("Инвалидация кэша мероприятий...");
+    log.info("Инвалидация кэша мероприятий");
     eventCache.clear();
   }
 
