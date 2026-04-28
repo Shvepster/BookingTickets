@@ -1,6 +1,7 @@
 package com.example.bookingtickets.service;
 
 import com.example.bookingtickets.dto.ConcurrencyResponseDto;
+import com.example.bookingtickets.exception.OperationFailedException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -73,11 +74,11 @@ public class ConcurrencyDemoService {
       }
 
       if (error.get() != null) {
-        throw new RuntimeException("Ошибка выполнения тестов многопоточности", error.get());
+        throw new OperationFailedException("Ошибка выполнения тестов многопоточности", error.get());
       }
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
-      throw new RuntimeException("Выполнение прервано", e);
+      throw new OperationFailedException("Выполнение прервано", e);
     }
   }
 }

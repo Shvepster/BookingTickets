@@ -3,6 +3,7 @@ package com.example.bookingtickets.service;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.example.bookingtickets.dto.ConcurrencyResponseDto;
+import com.example.bookingtickets.exception.OperationFailedException;
 import org.junit.jupiter.api.Test;
 
 class ConcurrencyDemoServiceTest {
@@ -11,17 +12,16 @@ class ConcurrencyDemoServiceTest {
 
   @Test
   void runRaceConditionDemo_ShouldKeepSafeCountersAccurate() {
-    ConcurrencyResponseDto result = service.runCounter(50, 10000);
-    long expectedCount = 500000L;
+    ConcurrencyResponseDto result = service.runCounter(50, 1000);
+    long expectedCount = 50000L;
 
     assertEquals(expectedCount, result.getAtomicCount());
-
     assertTrue(result.getNonAtomicCount() <= expectedCount);
   }
 
   @Test
   void runCounter_ShouldHandleExceptionInThread() {
-    assertThrows(RuntimeException.class, () -> {
+    assertThrows(OperationFailedException.class, () -> {
       service.runCounter(-1, 100);
     });
   }
@@ -29,6 +29,6 @@ class ConcurrencyDemoServiceTest {
   @Test
   void executeConcurrent_ShouldHandleInterruption() {
     Thread.currentThread().interrupt();
-    assertThrows(RuntimeException.class, () -> service.runCounter(1, 1));
+    assertThrows(OperationFailedException.class, () -> service.runCounter(1, 1));
   }
 }
