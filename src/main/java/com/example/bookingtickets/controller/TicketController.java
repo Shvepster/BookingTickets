@@ -34,6 +34,12 @@ public class TicketController {
 
   private final TicketService ticketService;
 
+  @GetMapping
+  @Operation(summary = "Список всех купленных билетов")
+  public List<TicketResponseDto> getAll() {
+    return ticketService.getAll();
+  }
+
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   @Operation(summary = "Купить билет")
