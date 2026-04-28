@@ -47,7 +47,9 @@ public class VenueService {
   }
 
   public List<VenueResponseDto> getAll() {
-    return venueRepository.findAll().stream().map(VenueMapper::toDto).toList();
+    return venueRepository.findAll().stream()
+        .map(VenueMapper::toDto)
+        .toList();
   }
 
   public List<VenueResponseDto> searchByName(String name) {
