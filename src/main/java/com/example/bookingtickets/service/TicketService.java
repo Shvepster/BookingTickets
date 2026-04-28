@@ -31,8 +31,6 @@ public class TicketService {
 
   @Transactional
   public void createMultiple(List<TicketRequestDto> dtos) {
-    // Используем Stream API для обхода списка
-    // Вызываем приватный метод напрямую, не нарушая работу прокси
     dtos.forEach(this::saveTicketInternal);
   }
 
