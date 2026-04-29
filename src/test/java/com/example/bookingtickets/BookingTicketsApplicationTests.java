@@ -1,5 +1,6 @@
 package com.example.bookingtickets;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -15,6 +16,7 @@ class BookingTicketsApplicationTests {
 
   @Test
   void contextLoads() {
+    assertNotNull(System.getProperty("java.version"));
   }
 
 }
