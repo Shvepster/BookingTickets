@@ -32,7 +32,6 @@ public class GlobalExceptionHandler {
         })
         .toList();
 
-    // Добавлено логирование для демонстрации на защите
     log.warn("Ошибка валидации для запроса {}: {}", request.getRequestURI(), errors);
 
     return buildResponse(HttpStatus.BAD_REQUEST, "Ошибка валидации", request, errors);

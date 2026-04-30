@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class ReportTaskStorage {
 
-  // Потокобезопасная мапа для хранения статусов
   private final Map<String, ReportTask> tasks = new ConcurrentHashMap<>();
 
   public String createTask() {
