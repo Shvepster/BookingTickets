@@ -19,7 +19,7 @@ public class AsyncReportExecutor {
     try {
       reportTaskStorage.updateStatus(taskId, TaskStatus.IN_PROGRESS);
 
-      Thread.sleep(30000);
+      Thread.sleep(20000);
 
       reportTaskStorage.updateStatus(taskId, TaskStatus.DONE);
       log.info("Генерация отчета успешно завершена: {}", taskId);
