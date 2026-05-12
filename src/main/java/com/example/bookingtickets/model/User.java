@@ -29,6 +29,8 @@ public class User {
 
   private String username;
 
+  private String password;
+
   private String email;
 
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

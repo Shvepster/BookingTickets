@@ -25,4 +25,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
   @EntityGraph(attributePaths = {"tickets"})
   List<User> findByUsernameContainingIgnoreCase(String username);
+
+  Optional<User> findByEmail(String email);
 }

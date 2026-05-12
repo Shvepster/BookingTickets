@@ -23,4 +23,7 @@ public class UserRequestDto {
   @NotBlank(message = "Email не может быть пустым")
   @Email(message = "Некорректный формат email")
   private String email;
+  @jakarta.validation.constraints.NotBlank(message = "Пароль не может быть пустым")
+  @jakarta.validation.constraints.Size(min = 6, message = "Пароль должен быть от 6 символов")
+  private String password;
 }
