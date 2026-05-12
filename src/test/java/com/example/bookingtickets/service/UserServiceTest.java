@@ -34,7 +34,7 @@ class UserServiceTest {
     user.setId(1L);
     user.setUsername("test_user");
     user.setEmail("test@test.com");
-    requestDto = new UserRequestDto("test_user", "test@test.com");
+    requestDto = new UserRequestDto("test@mail.com", "testUser", "password123");
   }
 
   @Test

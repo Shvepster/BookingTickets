@@ -36,7 +36,8 @@ public class AuthService {
     User savedUser = userRepository.save(user);
 
     String token = jwtUtils.generateToken(savedUser.getId(), savedUser.getUsername());
-    return new AuthResponseDto(token, savedUser.getId(), savedUser.getUsername(), savedUser.getEmail());
+    return new AuthResponseDto(token, savedUser.getId(),
+        savedUser.getUsername(), savedUser.getEmail());
   }
 
   @Transactional(readOnly = true)
