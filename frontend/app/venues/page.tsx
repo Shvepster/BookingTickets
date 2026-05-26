@@ -66,7 +66,7 @@ export default function VenuesPage() {
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Площадки</h1>
-                    <p className="mt-1 text-muted-foreground">Места проведения мероприятий (OneToMany)</p>
+                    <p className="mt-1 text-muted-foreground">Места проведения мероприятий </p>
                 </div>
                 {isAdmin && (
                     <Button onClick={() => openDialog()}>

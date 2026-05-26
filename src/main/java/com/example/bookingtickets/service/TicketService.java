@@ -3,6 +3,7 @@ package com.example.bookingtickets.service;
 import com.example.bookingtickets.dto.TicketRequestDto;
 import com.example.bookingtickets.dto.TicketResponseDto;
 import com.example.bookingtickets.exception.NotFoundException;
+import com.example.bookingtickets.exception.SeatAlreadyBookedException; // Добавлено
 import com.example.bookingtickets.mapper.TicketMapper;
 import com.example.bookingtickets.model.Event;
 import com.example.bookingtickets.model.Ticket;
@@ -19,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class TicketService {
-
   private final TicketRepository ticketRepository;
   private final UserRepository userRepository;
   private final EventRepository eventRepository;
@@ -37,15 +37,20 @@ public class TicketService {
   private TicketResponseDto saveTicketInternal(TicketRequestDto dto) {
     User user = userRepository.findById(dto.getUserId())
         .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
-
     Event event = eventRepository.findById(dto.getEventId())
         .orElseThrow(() -> new NotFoundException("Мероприятие не найдено"));
+
+    if (ticketRepository.existsByEventIdAndSeatNumber(dto.getEventId(), dto.getSeatNumber())) {
+      throw new SeatAlreadyBookedException(
+          String.format("Место %s на мероприятие '%s' уже забронировано",
+              dto.getSeatNumber(), event.getTitle())
+      );
+    }
 
     Ticket ticket = new Ticket();
     ticket.setSeatNumber(dto.getSeatNumber());
     ticket.setUser(user);
     ticket.setEvent(event);
-
     Ticket saved = ticketRepository.save(ticket);
     return TicketMapper.toDto(saved);
   }

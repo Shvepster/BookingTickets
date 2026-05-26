@@ -11,12 +11,30 @@ import {
 } from "@/components/ui/sidebar";
 
 const items = [
-    { title: "Афиша (События)", url: "/", icon: Calendar },
+    { title: "Афиша", url: "/", icon: Calendar },
     { title: "Мои билеты", url: "/my-tickets", icon: Ticket },
     { title: "Площадки", url: "/venues", icon: MapPin },
     { title: "Категории", url: "/categories", icon: Tags },
     { title: "Пользователи", url: "/users", icon: Users },
 ];
+
+function TicketproIcon({ className }: { className?: string }) {
+    return (
+        <svg
+            className={className}
+            viewBox="0 0 100 100"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+        >
+            <rect width="100" height="100" rx="24" fill="#005CA9" />
+            <path
+                d="M30 35H70C72.2 35 74 36.8 74 39V44C70 44 67 47 67 51C67 55 70 58 74 58V63C74 65.2 72.2 67 70 67H30C27.8 67 26 65.2 26 63V58C30 58 33 55 33 51C33 47 30 44 26 44V39C26 36.8 27.8 35 30 35Z"
+                fill="white"
+            />
+            <circle cx="50" cy="51" r="5" fill="#005CA9" />
+        </svg>
+    );
+}
 
 export function AppSidebar() {
     const pathname = usePathname();
@@ -26,7 +44,8 @@ export function AppSidebar() {
         <Sidebar>
             <SidebarHeader className="p-4 border-b">
                 <div className="flex items-center gap-2 font-bold text-xl">
-                    <Ticket className="h-6 w-6 text-primary" />
+                    {/* ИСПРАВЛЕНО: заменено на фирменную синюю иконку */}
+                    <TicketproIcon className="h-6 w-6 shrink-0" />
                     <span>BookingTickets</span>
                 </div>
             </SidebarHeader>
@@ -38,7 +57,6 @@ export function AppSidebar() {
                             {items.map((item) => {
                                 // Скрываем "Пользователи" от не-админов
                                 if (item.title === "Пользователи" && !isAdmin) return null;
-
                                 return (
                                     <SidebarMenuItem key={item.title}>
                                         <SidebarMenuButton asChild isActive={pathname === item.url}>

@@ -68,7 +68,7 @@ export const authApi = {
 };
 
 export const eventsApi = {
-    getAll: () => fetchApi<EventResponseDto[]>("/events"),
+    getAll: () => fetchApi<EventResponseDto[]>("/events/all"),
     getPaged: (page: number, size: number) => fetchApi<PageResponse<EventResponseDto>>(`/events/paged?page=${page}&size=${size}`),
     searchByTitle: (title: string) => fetchApi<EventResponseDto[]>(`/events/search?title=${encodeURIComponent(title)}`),
     searchComplex: (venueName = "", categoryName = "", page = 0, size = 10, useNative = false) => {

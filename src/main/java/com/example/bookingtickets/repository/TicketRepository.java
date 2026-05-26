@@ -9,7 +9,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
-
   @Override
   @EntityGraph(attributePaths = {"user", "event"})
   List<Ticket> findAll();
@@ -20,4 +19,6 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
   @EntityGraph(attributePaths = {"user", "event"})
   List<Ticket> findByUserId(Long userId);
+
+  boolean existsByEventIdAndSeatNumber(Long eventId, String seatNumber);
 }

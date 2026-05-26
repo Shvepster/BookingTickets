@@ -110,4 +110,33 @@ public class GlobalExceptionHandler {
     );
     return ResponseEntity.status(status).body(response);
   }
+
+  @ExceptionHandler(com.example.bookingtickets.exception.SeatAlreadyBookedException.class)
+  public ResponseEntity<ErrorResponse> seatAlreadyBooked(
+      com.example.bookingtickets.exception.SeatAlreadyBookedException exception,
+      jakarta.servlet.http.HttpServletRequest request
+  ) {
+    log.warn("Попытка бронирования занятого места на {}: {}", request.getRequestURI(), exception.getMessage());
+    return buildResponse(
+        HttpStatus.CONFLICT,
+        "Выбранное место уже занято",
+        request,
+        List.of(exception.getMessage())
+    );
+  }
+
+  @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+  public ResponseEntity<ErrorResponse> dataIntegrityViolation(
+      org.springframework.dao.DataIntegrityViolationException exception,
+      jakarta.servlet.http.HttpServletRequest request
+  ) {
+    log.warn("Конфликт ограничений уникальности БД на {}: {}", request.getRequestURI(), exception.getMessage());
+    String detailMessage = "Это место было забронировано другим пользователем мгновением ранее. Пожалуйста, выберите другое место.";
+    return buildResponse(
+        HttpStatus.CONFLICT,
+        "Конфликт бронирования",
+        request,
+        List.of(detailMessage)
+    );
+  }
 }

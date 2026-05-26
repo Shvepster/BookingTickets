@@ -69,7 +69,7 @@ export default function EventsPage() {
             alert(`Билет на место ${selectedSeat} успешно оформлен!`);
             setIsBuyOpen(false);
             setSelectedSeat("");
-            mutate("/tickets"); // Обновляем глобальный кеш билетов, чтобы место сразу стало занятым
+            mutate("/tickets");
         } catch (error: any) {
             alert(error.message);
         } finally {
