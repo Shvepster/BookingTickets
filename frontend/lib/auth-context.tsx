@@ -9,6 +9,7 @@ interface AuthContextType {
     user: UserResponseDto | null;
     token: string | null;
     isLoading: boolean;
+    isAdmin: boolean;
     login: (data: LoginRequestDto) => Promise<void>;
     register: (data: UserRequestDto) => Promise<void>;
     logout: () => void;
@@ -26,7 +27,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Восстанавливаем сессию при перезагрузке страницы
         const storedToken = localStorage.getItem("token");
         const storedUser = localStorage.getItem("user");
-
         if (storedToken && storedUser) {
             setToken(storedToken);
             setUser(JSON.parse(storedUser));
@@ -37,10 +37,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const login = async (data: LoginRequestDto) => {
         const response = await authApi.login(data);
         const userData = { id: response.userId, username: response.username, email: response.email };
-
         localStorage.setItem("token", response.token);
         localStorage.setItem("user", JSON.stringify(userData));
-
         setToken(response.token);
         setUser(userData);
         router.push("/");
@@ -49,10 +47,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const register = async (data: UserRequestDto) => {
         const response = await authApi.register(data);
         const userData = { id: response.userId, username: response.username, email: response.email };
-
         localStorage.setItem("token", response.token);
         localStorage.setItem("user", JSON.stringify(userData));
-
         setToken(response.token);
         setUser(userData);
         router.push("/");
@@ -66,8 +62,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         router.push("/login");
     };
 
+    const isAdmin = user?.username === "Vebster" || user?.email === "yar.paradese2008@gmail.com";
+
     return (
-        <AuthContext.Provider value={{ user, token, isLoading, login, register, logout }}>
+        <AuthContext.Provider value={{ user, token, isLoading, isAdmin, login, register, logout }}>
             {children}
         </AuthContext.Provider>
     );

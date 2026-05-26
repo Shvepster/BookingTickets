@@ -20,7 +20,7 @@ const items = [
 
 export function AppSidebar() {
     const pathname = usePathname();
-    const { logout, user } = useAuth();
+    const { logout, user, isAdmin } = useAuth();
 
     return (
         <Sidebar>
@@ -35,16 +35,21 @@ export function AppSidebar() {
                     <SidebarGroupLabel>Навигация</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
-                            {items.map((item) => (
-                                <SidebarMenuItem key={item.title}>
-                                    <SidebarMenuButton asChild isActive={pathname === item.url}>
-                                        <Link href={item.url}>
-                                            <item.icon className="h-4 w-4" />
-                                            <span>{item.title}</span>
-                                        </Link>
-                                    </SidebarMenuButton>
-                                </SidebarMenuItem>
-                            ))}
+                            {items.map((item) => {
+                                // Скрываем "Пользователи" от не-админов
+                                if (item.title === "Пользователи" && !isAdmin) return null;
+
+                                return (
+                                    <SidebarMenuItem key={item.title}>
+                                        <SidebarMenuButton asChild isActive={pathname === item.url}>
+                                            <Link href={item.url}>
+                                                <item.icon className="h-4 w-4" />
+                                                <span>{item.title}</span>
+                                            </Link>
+                                        </SidebarMenuButton>
+                                    </SidebarMenuItem>
+                                );
+                            })}
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
@@ -52,7 +57,9 @@ export function AppSidebar() {
             <SidebarFooter className="p-4 border-t">
                 <div className="flex items-center justify-between">
                     <div className="flex flex-col">
-                        <span className="text-sm font-medium truncate w-32">{user?.username || "Гость"}</span>
+                        <span className="text-sm font-medium truncate w-32">
+                            {user?.username || "Гость"} {isAdmin && " (Админ)"}
+                        </span>
                         <span className="text-xs text-muted-foreground truncate w-32">{user?.email || ""}</span>
                     </div>
                     <SidebarMenuButton

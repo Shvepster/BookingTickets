@@ -9,6 +9,7 @@ import com.example.bookingtickets.model.User;
 import com.example.bookingtickets.repository.UserRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
   private final UserRepository userRepository;
+  private final PasswordEncoder passwordEncoder; // Внедряем бин шифрования
 
   @Transactional
   public UserResponseDto create(UserRequestDto dto) {
@@ -27,6 +29,7 @@ public class UserService {
     User user = new User();
     user.setUsername(dto.getUsername());
     user.setEmail(dto.getEmail());
+    user.setPassword(passwordEncoder.encode(dto.getPassword()));
     return UserMapper.toDto(userRepository.save(user));
   }
 
@@ -36,6 +39,11 @@ public class UserService {
         .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
     user.setUsername(dto.getUsername());
     user.setEmail(dto.getEmail());
+
+    if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+      user.setPassword(passwordEncoder.encode(dto.getPassword()));
+    }
+
     return UserMapper.toDto(userRepository.save(user));
   }
 

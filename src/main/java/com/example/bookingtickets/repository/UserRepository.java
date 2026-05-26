@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 public interface UserRepository extends JpaRepository<User, Long> {
 
   boolean existsByEmail(String email);
+  boolean existsByUsername(String username);
 
   @EntityGraph(attributePaths = {"tickets"})
   Optional<User> findByUsername(String username);
@@ -26,5 +27,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
   @EntityGraph(attributePaths = {"tickets"})
   List<User> findByUsernameContainingIgnoreCase(String username);
 
+  @EntityGraph(attributePaths = {"tickets"})
   Optional<User> findByEmail(String email);
 }

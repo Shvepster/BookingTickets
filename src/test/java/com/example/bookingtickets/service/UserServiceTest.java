@@ -18,11 +18,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
   @Mock private UserRepository userRepository;
+  @Mock private PasswordEncoder passwordEncoder; // Мокаем бин шифрования
   @InjectMocks private UserService userService;
 
   private User user;
@@ -34,17 +36,20 @@ class UserServiceTest {
     user.setId(1L);
     user.setUsername("test_user");
     user.setEmail("test@test.com");
-    requestDto = new UserRequestDto("test@mail.com", "testUser", "password123");
+    user.setPassword("encoded_password");
+    requestDto = new UserRequestDto("testUser", "test@mail.com", "password123");
   }
 
   @Test
   void create_Success() {
     when(userRepository.existsByEmail(any())).thenReturn(false);
+    when(passwordEncoder.encode(any())).thenReturn("encoded_password");
     when(userRepository.save(any())).thenReturn(user);
 
     UserResponseDto response = userService.create(requestDto);
     assertNotNull(response);
     assertEquals("test_user", response.getUsername());
+    verify(passwordEncoder).encode("password123");
   }
 
   @Test
@@ -54,13 +59,15 @@ class UserServiceTest {
   }
 
   @Test
-  void update_Success() {
+  void update_Success_WithPassword() {
     when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+    when(passwordEncoder.encode(any())).thenReturn("new_encoded_password");
     when(userRepository.save(any())).thenReturn(user);
 
     UserResponseDto response = userService.update(1L, requestDto);
     assertNotNull(response);
     assertEquals("test_user", response.getUsername());
+    verify(passwordEncoder).encode("password123");
   }
 
   @Test

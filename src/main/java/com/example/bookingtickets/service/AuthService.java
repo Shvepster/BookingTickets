@@ -25,7 +25,11 @@ public class AuthService {
   @Transactional
   public AuthResponseDto register(UserRequestDto request) {
     if (userRepository.existsByEmail(request.getEmail())) {
-      throw new EmailAlreadyExistsException("Email уже занят");
+      throw new EmailAlreadyExistsException("Этот Email уже занят");
+    }
+
+    if (userRepository.existsByUsername(request.getUsername())) {
+      throw new OperationFailedException("Этот логин уже занят");
     }
 
     User user = new User();
@@ -35,9 +39,14 @@ public class AuthService {
 
     User savedUser = userRepository.save(user);
 
+    // 4. Генерируем токен
     String token = jwtUtils.generateToken(savedUser.getId(), savedUser.getUsername());
-    return new AuthResponseDto(token, savedUser.getId(),
-        savedUser.getUsername(), savedUser.getEmail());
+    return new AuthResponseDto(
+        token,
+        savedUser.getId(),
+        savedUser.getUsername(),
+        savedUser.getEmail()
+    );
   }
 
   @Transactional(readOnly = true)
@@ -53,6 +62,11 @@ public class AuthService {
     }
 
     String token = jwtUtils.generateToken(user.getId(), user.getUsername());
-    return new AuthResponseDto(token, user.getId(), user.getUsername(), user.getEmail());
+    return new AuthResponseDto(
+        token,
+        user.getId(),
+        user.getUsername(),
+        user.getEmail()
+    );
   }
 }

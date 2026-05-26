@@ -3,11 +3,13 @@
 import useSWR from "swr";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { ticketsApi } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Trash2, Loader2 } from "lucide-react";
+import { Trash2, Loader2, ShieldAlert } from "lucide-react";
 
 export default function TicketsManagementPage() {
+    const { isAdmin } = useAuth();
     const { data: tickets, isLoading, mutate } = useSWR("/tickets", ticketsApi.getAll);
 
     const handleDelete = async (id: number) => {
@@ -19,6 +21,19 @@ export default function TicketsManagementPage() {
             alert(error.message);
         }
     };
+
+    // Если пользователь не админ, показываем заглушку
+    if (!isAdmin) {
+        return (
+            <DashboardLayout>
+                <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+                    <ShieldAlert className="h-16 w-16 mb-4 text-destructive opacity-50" />
+                    <h1 className="text-2xl font-bold text-foreground mb-2">Доступ запрещен</h1>
+                    <p>У вас нет прав для просмотра всех билетов системы.</p>
+                </div>
+            </DashboardLayout>
+        );
+    }
 
     return (
         <DashboardLayout>
@@ -54,9 +69,9 @@ export default function TicketsManagementPage() {
                                         <TableCell>{ticket.eventTitle}</TableCell>
                                         <TableCell className="font-semibold">{ticket.userName}</TableCell>
                                         <TableCell>
-                      <span className="px-2 py-1 bg-secondary text-secondary-foreground rounded text-xs">
-                        {ticket.seatNumber}
-                      </span>
+                                            <span className="px-2 py-1 bg-secondary text-secondary-foreground rounded text-xs">
+                                                {ticket.seatNumber}
+                                            </span>
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <Button variant="destructive" size="icon" onClick={() => handleDelete(ticket.id)}>
