@@ -70,15 +70,15 @@ public class EventController {
   }
 
   @GetMapping("/search-complex")
-  @Operation(summary = "Сложный поиск (Блок 3)")
+  @Operation(summary = "Сложный поиск ")
   @ApiResponses({
       @ApiResponse(responseCode = "200", description = "Успешно"),
       @ApiResponse(responseCode = "400", description = "Ошибка валидации параметров",
           content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   })
   public Page<EventResponseDto> searchComplex(
-      @RequestParam String venueName,
-      @RequestParam String categoryName,
+      @RequestParam(required = false) String venueName,
+      @RequestParam(required = false) String categoryName,
       @Parameter(description = "Использовать Native Query?")
       @RequestParam(defaultValue = "false") boolean useNative,
       Pageable pageable

@@ -33,7 +33,8 @@ public interface EventRepository extends JpaRepository<Event, Long> {
       "SELECT e FROM Event e "
           + "JOIN FETCH e.venue v "
           + "JOIN FETCH e.categories c "
-          + "WHERE v.name = :venueName AND c.name = :categoryName"
+          + "WHERE (:venueName IS NULL OR v.name = :venueName) "
+          + "AND (:categoryName IS NULL OR c.name = :categoryName)"
   )
   Page<Event> findComplexByJpql(
       @Param("venueName") String venueName,
@@ -46,12 +47,14 @@ public interface EventRepository extends JpaRepository<Event, Long> {
           + "JOIN venues v ON e.venue_id = v.id "
           + "JOIN event_categories ec ON e.id = ec.event_id "
           + "JOIN categories c ON ec.category_id = c.id "
-          + "WHERE v.name = :venueName AND c.name = :categoryName",
+          + "WHERE (:venueName IS NULL OR v.name = :venueName) "
+          + "AND (:categoryName IS NULL OR c.name = :categoryName)",
       countQuery = "SELECT count(*) FROM events e "
           + "JOIN venues v ON e.venue_id = v.id "
           + "JOIN event_categories ec ON e.id = ec.event_id "
           + "JOIN categories c ON ec.category_id = c.id "
-          + "WHERE v.name = :venueName AND c.name = :categoryName",
+          + "WHERE (:venueName IS NULL OR v.name = :venueName) "
+          + "AND (:categoryName IS NULL OR c.name = :categoryName)",
       nativeQuery = true
   )
   Page<Event> findComplexByNative(
@@ -59,4 +62,5 @@ public interface EventRepository extends JpaRepository<Event, Long> {
       @Param("categoryName") String categoryName,
       Pageable pageable
   );
+
 }

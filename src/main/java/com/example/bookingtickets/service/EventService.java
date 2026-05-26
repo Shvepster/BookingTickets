@@ -96,7 +96,10 @@ public class EventService {
   }
 
   public Page<EventResponseDto> searchComplexEvents(
-      String venue, String cat, Pageable page, boolean useNative) {
+      String venueName, String categoryName, Pageable page, boolean useNative) {
+
+    String venue = (venueName == null || venueName.isBlank()) ? null : venueName;
+    String cat = (categoryName == null || categoryName.isBlank()) ? null : categoryName;
 
     EventSearchKey key = new EventSearchKey(
         venue,
