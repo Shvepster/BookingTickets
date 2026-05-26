@@ -1,219 +1,143 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import useSWR, { mutate } from "swr";
-import { Header } from "@/components/header";
-import { DataTable } from "@/components/data-table";
+import { useState } from "react";
+import useSWR from "swr";
+import { DashboardLayout } from "@/components/dashboard-layout";
+import { usersApi } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Plus, Search } from "lucide-react";
-import { usersApi, fetcher } from "@/lib/api";
-import type { UserResponseDto, UserRequestDto } from "@/lib/types";
-
-const demoUsers: UserResponseDto[] = [
-  { id: 1, username: "ivan_petrov", email: "ivan@example.com" },
-  { id: 2, username: "maria_sidorova", email: "maria@example.com" },
-  { id: 3, username: "alex_kozlov", email: "alex@example.com" },
-  { id: 4, username: "elena_novikova", email: "elena@example.com" },
-  { id: 5, username: "dmitry_volkov", email: "dmitry@example.com" },
-];
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Plus, Pencil, Trash2, Loader2, Mail } from "lucide-react";
+import type { UserResponseDto } from "@/lib/types";
 
 export default function UsersPage() {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<UserResponseDto | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [useDemo, setUseDemo] = useState(false);
+    const { data: users, isLoading, mutate } = useSWR("/users", usersApi.getAll);
+    const [isOpen, setIsOpen] = useState(false);
+    const [editingUser, setEditingUser] = useState<UserResponseDto | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { data: apiUsers, error } = useSWR<UserResponseDto[]>(
-    "/api/users",
-    fetcher,
-    { revalidateOnFocus: false }
-  );
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        const formData = new FormData(e.currentTarget);
+        const username = formData.get("username") as string;
+        const email = formData.get("email") as string;
+        const password = formData.get("password") as string;
 
-  useEffect(() => {
-    if (error) setUseDemo(true);
-  }, [error]);
+        try {
+            if (editingUser) {
+                await usersApi.update(editingUser.id, { username, email, password: password || undefined });
+            } else {
+                await usersApi.create({ username, email, password });
+            }
+            mutate();
+            setIsOpen(false);
+        } catch (error: any) {
+            alert(error.message);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
-  const users = useDemo ? demoUsers : (apiUsers || []);
+    const handleDelete = async (id: number) => {
+        if (!confirm("Удалить пользователя?")) return;
+        try {
+            await usersApi.delete(id);
+            mutate();
+        } catch (error: any) {
+            alert(error.message);
+        }
+    };
 
-  const filteredUsers = users.filter(
-    (user) =>
-      user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+    const openDialog = (user?: UserResponseDto) => {
+        setEditingUser(user || null);
+        setIsOpen(true);
+    };
 
-  const openDialog = (user?: UserResponseDto) => {
-    if (user) {
-      setEditingUser(user);
-      setUsername(user.username);
-      setEmail(user.email);
-      setPassword("");
-    } else {
-      setEditingUser(null);
-      setUsername("");
-      setEmail("");
-      setPassword("");
-    }
-    setIsDialogOpen(true);
-  };
-
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    const data: UserRequestDto = { username, email, password };
-
-    if (useDemo) {
-      alert("Демо-режим: операции сохранения недоступны. Подключите API.");
-      setIsDialogOpen(false);
-      return;
-    }
-
-    try {
-      if (editingUser) {
-        await usersApi.update(editingUser.id, data);
-      } else {
-        await usersApi.create(data);
-      }
-      mutate("/api/users");
-      setIsDialogOpen(false);
-    } catch (error) {
-      console.error("Failed to save user:", error);
-    }
-  }, [username, email, password, editingUser, useDemo]);
-
-  const handleDelete = useCallback(async (id: number) => {
-    if (useDemo) {
-      alert("Демо-режим: удаление недоступно. Подключите API.");
-      return;
-    }
-    if (!confirm("Удалить пользователя?")) return;
-    try {
-      await usersApi.delete(id);
-      mutate("/api/users");
-    } catch (error) {
-      console.error("Failed to delete user:", error);
-    }
-  }, [useDemo]);
-
-  const columns = [
-    { key: "id" as const, header: "ID" },
-    { key: "username" as const, header: "Имя пользователя" },
-    { key: "email" as const, header: "Email" },
-  ];
-
-  return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Пользователи</h1>
-            <p className="mt-1 text-muted-foreground">
-              {useDemo && (
-                <span className="mr-2 rounded bg-yellow-100 px-2 py-0.5 text-xs text-yellow-800">
-                  Демо-режим
-                </span>
-              )}
-              Управление профилями клиентов (OneToMany: User → Ticket)
-            </p>
-          </div>
-          <Button onClick={() => openDialog()}>
-            <Plus className="mr-2 h-4 w-4" />
-            Добавить
-          </Button>
-        </div>
-
-        <div className="mb-6">
-          <div className="relative max-w-sm">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Поиск по имени или email..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </div>
-
-        <DataTable
-          data={filteredUsers}
-          columns={columns}
-          onEdit={openDialog}
-          onDelete={handleDelete}
-        />
-      </main>
-
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>
-              {editingUser ? "Редактировать пользователя" : "Добавить пользователя"}
-            </DialogTitle>
-            <DialogDescription>
-              {editingUser
-                ? "Измените данные пользователя"
-                : "Заполните данные для регистрации"}
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleSubmit}>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="username">Имя пользователя</Label>
-                <Input
-                  id="username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="ivan_petrov"
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="ivan@example.com"
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="password">
-                  Пароль {editingUser && "(оставьте пустым, чтобы не менять)"}
-                </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required={!editingUser}
-                />
-              </div>
+    return (
+        <DashboardLayout>
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold">Пользователи</h1>
+                <Button onClick={() => openDialog()}>
+                    <Plus className="mr-2 h-4 w-4" /> Добавить
+                </Button>
             </div>
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                Отмена
-              </Button>
-              <Button type="submit">
-                {editingUser ? "Сохранить" : "Создать"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
+
+            <div className="bg-background rounded-md border">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead className="w-[80px]">ID</TableHead>
+                            <TableHead>Логин</TableHead>
+                            <TableHead>Email</TableHead>
+                            <TableHead className="text-right">Действия</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {isLoading ? (
+                            <TableRow>
+                                <TableCell colSpan={4} className="text-center py-10">
+                                    <Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" />
+                                </TableCell>
+                            </TableRow>
+                        ) : users?.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={4} className="text-center py-10 text-muted-foreground">Пользователей пока нет</TableCell>
+                            </TableRow>
+                        ) : (
+                            users?.map((user) => (
+                                <TableRow key={user.id}>
+                                    <TableCell className="font-medium">{user.id}</TableCell>
+                                    <TableCell>{user.username}</TableCell>
+                                    <TableCell>
+                                        <div className="flex items-center text-muted-foreground">
+                                            <Mail className="mr-2 h-4 w-4" /> {user.email}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="text-right space-x-2">
+                                        <Button variant="outline" size="icon" onClick={() => openDialog(user)}>
+                                            <Pencil className="h-4 w-4" />
+                                        </Button>
+                                        <Button variant="destructive" size="icon" onClick={() => handleDelete(user.id)}>
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
+
+            <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{editingUser ? "Редактировать пользователя" : "Добавить пользователя"}</DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="username">Логин</Label>
+                            <Input id="username" name="username" defaultValue={editingUser?.username} required />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="email">Email</Label>
+                            <Input id="email" name="email" type="email" defaultValue={editingUser?.email} required />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="password">{editingUser ? "Новый пароль (оставьте пустым, если не меняете)" : "Пароль"}</Label>
+                            <Input id="password" name="password" type="password" required={!editingUser} />
+                        </div>
+                        <DialogFooter>
+                            <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>Отмена</Button>
+                            <Button type="submit" disabled={isSubmitting}>
+                                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Сохранить"}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
+        </DashboardLayout>
+    );
 }

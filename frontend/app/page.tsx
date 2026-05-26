@@ -1,268 +1,205 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import useSWR, { mutate } from "swr";
-import { Header } from "@/components/header";
-import { EventCard } from "@/components/event-card";
-
-import { BuyTicketDialog } from "@/components/buy-ticket-dialog";
+import { DashboardLayout } from "@/components/dashboard-layout";
+import { eventsApi, venuesApi, categoriesApi, ticketsApi } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Search, X } from "lucide-react";
-import { ticketsApi, fetcher } from "@/lib/api";
-import type { EventResponseDto, VenueResponseDto, CategoryResponseDto, UserResponseDto, TicketRequestDto } from "@/lib/types";
-
-// Demo data for when API is not available
-const demoEvents: EventResponseDto[] = [
-  {
-    id: 1,
-    title: "Концерт Scorpions",
-    formattedPrice: "150.00 BYN",
-    venueName: "Минск-Арена",
-    eventDate: "2026-07-15T20:00:00",
-    categories: ["Рок", "Шоу"],
-  },
-  {
-    id: 2,
-    title: "Балет Лебединое озеро",
-    formattedPrice: "80.00 BYN",
-    venueName: "Большой театр Беларуси",
-    eventDate: "2026-06-20T19:00:00",
-    categories: ["Балет", "Классика"],
-  },
-  {
-    id: 3,
-    title: "Комедия Ревизор",
-    formattedPrice: "45.00 BYN",
-    venueName: "Купаловский театр",
-    eventDate: "2026-06-10T18:30:00",
-    categories: ["Комедия", "Театр"],
-  },
-  {
-    id: 4,
-    title: "DJ Max Live",
-    formattedPrice: "60.00 BYN",
-    venueName: "RE:PUBLIC",
-    eventDate: "2026-06-25T22:00:00",
-    categories: ["Электроника", "18+"],
-  },
-  {
-    id: 5,
-    title: "Детский спектакль Золушка",
-    formattedPrice: "25.00 BYN",
-    venueName: "ТЮЗ",
-    eventDate: "2026-06-15T12:00:00",
-    categories: ["Детское", "Сказка"],
-  },
-  {
-    id: 6,
-    title: "Фестиваль джаза",
-    formattedPrice: "90.00 BYN",
-    venueName: "Дворец Республики",
-    eventDate: "2026-08-01T19:00:00",
-    categories: ["Джаз", "Фестиваль"],
-  },
-];
-
-const demoVenues: VenueResponseDto[] = [
-  { id: 1, name: "Минск-Арена", address: "пр. Победителей, 111" },
-  { id: 2, name: "Большой театр Беларуси", address: "пл. Парижской Коммуны, 1" },
-  { id: 3, name: "Купаловский театр", address: "ул. Энгельса, 7" },
-  { id: 4, name: "RE:PUBLIC", address: "пр. Победителей, 9" },
-  { id: 5, name: "ТЮЗ", address: "ул. Энгельса, 26" },
-  { id: 6, name: "Дворец Республики", address: "пр. Независимости, 20" },
-];
-
-const demoCategories: CategoryResponseDto[] = [
-  { id: 1, name: "Рок" },
-  { id: 2, name: "Шоу" },
-  { id: 3, name: "Балет" },
-  { id: 4, name: "Классика" },
-  { id: 5, name: "Комедия" },
-  { id: 6, name: "Театр" },
-  { id: 7, name: "Электроника" },
-  { id: 8, name: "18+" },
-  { id: 9, name: "Детское" },
-  { id: 10, name: "Сказка" },
-  { id: 11, name: "Джаз" },
-  { id: 12, name: "Фестиваль" },
-];
-
-const demoUsers: UserResponseDto[] = [
-  { id: 1, username: "ivan_petrov", email: "ivan@example.com" },
-  { id: 2, username: "maria_sidorova", email: "maria@example.com" },
-  { id: 3, username: "alex_kozlov", email: "alex@example.com" },
-];
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, MapPin, Tags, Search, X, Loader2, Ticket } from "lucide-react";
+import type { EventResponseDto } from "@/lib/types";
 
 export default function EventsPage() {
-  const [isBuyOpen, setIsBuyOpen] = useState(false);
-  const [buyingEvent, setBuyingEvent] = useState<EventResponseDto | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filterVenue, setFilterVenue] = useState<string>("all");
-  const [filterCategory, setFilterCategory] = useState<string>("all");
-  const [useDemo, setUseDemo] = useState(false);
+    const { user } = useAuth();
 
-  // Fetch data from API
-  const { data: apiEvents, error: eventsError } = useSWR<EventResponseDto[]>(
-    "/api/events/all",
-    fetcher,
-    { revalidateOnFocus: false }
-  );
-  const { data: apiVenues } = useSWR<VenueResponseDto[]>("/api/venues", fetcher, { revalidateOnFocus: false });
-  const { data: apiCategories } = useSWR<CategoryResponseDto[]>("/api/categories", fetcher, { revalidateOnFocus: false });
-  const { data: apiUsers } = useSWR<UserResponseDto[]>("/api/users", fetcher, { revalidateOnFocus: false });
+    const [selectedVenue, setSelectedVenue] = useState<string>("");
+    const [selectedCategory, setSelectedCategory] = useState<string>("");
+    const [useNative, setUseNative] = useState<boolean>(false);
+    const [page, setPage] = useState(0);
 
-  // Use demo data if API is not available
-  useEffect(() => {
-    if (eventsError) {
-      setUseDemo(true);
-    }
-  }, [eventsError]);
+    const { data: venues } = useSWR("/venues", venuesApi.getAll);
+    const { data: categories } = useSWR("/categories", categoriesApi.getAll);
 
-  const events = useDemo ? demoEvents : (apiEvents || []);
-  const venues = useDemo ? demoVenues : (apiVenues || []);
-  const categories = useDemo ? demoCategories : (apiCategories || []);
-  const users = useDemo ? demoUsers : (apiUsers || []);
+    const { data: pagedEvents, isLoading } = useSWR(
+        `/events/search-complex?venue=${selectedVenue}&category=${selectedCategory}&page=${page}&native=${useNative}`,
+        () => eventsApi.searchComplex(selectedVenue, selectedCategory, page, 6, useNative)
+    );
 
-  // Filter events
-  const filteredEvents = events.filter((event) => {
-    const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesVenue = filterVenue === "all" || event.venueName === filterVenue;
-    const matchesCategory =
-      filterCategory === "all" ||
-      event.categories?.some((c) => c === filterCategory);
-    return matchesSearch && matchesVenue && matchesCategory;
-  });
+    const [isBuyOpen, setIsBuyOpen] = useState(false);
+    const [selectedEvent, setSelectedEvent] = useState<EventResponseDto | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleBuyTicket = useCallback(async (data: TicketRequestDto) => {
-    if (useDemo) {
-      alert(`Демо-режим: билет на место ${data.seatNumber} забронирован! (симуляция)`);
-      return;
-    }
-    try {
-      await ticketsApi.create(data);
-      alert("Билет успешно куплен!");
-    } catch (error) {
-      console.error("Failed to buy ticket:", error);
-    }
-  }, [useDemo]);
+    const handleBuyTicket = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        if (!selectedEvent || !user) return;
+        setIsSubmitting(true);
 
-  const openBuyDialog = (event: EventResponseDto) => {
-    setBuyingEvent(event);
-    setIsBuyOpen(true);
-  };
+        const formData = new FormData(e.currentTarget);
+        const seatNumber = formData.get("seatNumber") as string;
 
-  const clearFilters = () => {
-    setSearchQuery("");
-    setFilterVenue("all");
-    setFilterCategory("all");
-  };
+        try {
+            await ticketsApi.create({
+                seatNumber,
+                eventId: selectedEvent.id,
+                userId: user.id
+            });
+            alert(`Билет на место ${seatNumber} успешно оформлен!`);
+            setIsBuyOpen(false);
+        } catch (error: any) {
+            alert(error.message);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
-  const hasFilters = searchQuery || filterVenue !== "all" || filterCategory !== "all";
+    const clearFilters = () => {
+        setSelectedVenue("");
+        setSelectedCategory("");
+        setPage(0);
+    };
 
-  return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Афиша мероприятий</h1>
-            <p className="mt-1 text-muted-foreground">
-              {useDemo && (
-                <span className="mr-2 rounded bg-yellow-100 px-2 py-0.5 text-xs text-yellow-800">
-                  Демо-режим
-                </span>
-              )}
-              Найдено: {filteredEvents.length} мероприятий
-            </p>
-          </div>
+    return (
+        <DashboardLayout>
+            <div className="flex flex-col space-y-6">
+                <div className="flex justify-between items-center">
+                    <h1 className="text-2xl font-bold">Афиша мероприятий</h1>
+                </div>
 
-        </div>
+                {/* Панель фильтрации (Демонстрирует Блок 3 и Блок 7) */}
+                <Card className="p-4">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                        <div className="space-y-2">
+                            <Label>Площадка (OneToMany)</Label>
+                            <Select value={selectedVenue} onValueChange={setSelectedVenue}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Все площадки" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {venues?.map(v => (
+                                        <SelectItem key={v.id} value={v.name}>{v.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
 
-        {/* Filters */}
-        <div className="mb-6 rounded-lg border border-border bg-card p-4">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Поиск по названию..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+                        <div className="space-y-2">
+                            <Label>Категория (ManyToMany)</Label>
+                            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Все категории" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {categories?.map(c => (
+                                        <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="flex items-center space-x-2 h-10">
+                            <input
+                                type="checkbox"
+                                id="native"
+                                checked={useNative}
+                                onChange={(e) => setUseNative(e.target.checked)}
+                                className="h-4 w-4 rounded border-gray-300"
+                            />
+                            <Label htmlFor="native" className="cursor-pointer">Использовать Native Query (Лаб. 3)</Label>
+                        </div>
+
+                        <div className="flex space-x-2">
+                            <Button variant="outline" className="w-full" onClick={clearFilters}>
+                                <X className="mr-2 h-4 w-4" /> Сбросить
+                            </Button>
+                        </div>
+                    </div>
+                </Card>
+
+                {/* Сетка мероприятий */}
+                {isLoading ? (
+                    <div className="flex justify-center py-20">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    </div>
+                ) : !pagedEvents?.content || pagedEvents.content.length === 0 ? (
+                    <div className="text-center py-20 text-muted-foreground">Мероприятий не найдено</div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {pagedEvents.content.map((event) => (
+                            <Card key={event.id} className="flex flex-col h-full justify-between hover:shadow-lg transition-shadow">
+                                <CardHeader>
+                                    <div className="flex justify-between items-start mb-2">
+                                        <span className="text-sm font-bold text-primary">{event.formattedPrice}</span>
+                                        <div className="flex flex-wrap gap-1 justify-end max-w-[60%]">
+                                            {event.categories?.map((cat) => (
+                                                <Badge key={cat} variant="secondary" className="text-[10px]">{cat}</Badge>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <CardTitle className="text-xl line-clamp-1">{event.title}</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-3 text-sm text-muted-foreground">
+                                    <div className="flex items-center gap-2">
+                                        <MapPin className="h-4 w-4 shrink-0 text-muted-foreground" />
+                                        <span className="truncate">{event.venueName}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Calendar className="h-4 w-4 shrink-0 text-muted-foreground" />
+                                        <span>{new Date(event.eventDate).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+                                    </div>
+                                </CardContent>
+                                <CardFooter className="pt-0">
+                                    <Button className="w-full" onClick={() => { setSelectedEvent(event); setIsBuyOpen(true); }}>
+                                        <Ticket className="mr-2 h-4 w-4" /> Купить билет
+                                    </Button>
+                                </CardFooter>
+                            </Card>
+                        ))}
+                    </div>
+                )}
+
+                {/* Пагинация */}
+                {pagedEvents && pagedEvents.totalPages > 1 && (
+                    <div className="flex justify-center space-x-2 mt-4">
+                        <Button variant="outline" disabled={page === 0} onClick={() => setPage(p => p - 1)}>Назад</Button>
+                        <span className="flex items-center px-4 text-sm font-medium">Страница {page + 1} из {pagedEvents.totalPages}</span>
+                        <Button variant="outline" disabled={page >= pagedEvents.totalPages - 1} onClick={() => setPage(p => p + 1)}>Вперед</Button>
+                    </div>
+                )}
             </div>
-            <Select value={filterVenue} onValueChange={setFilterVenue}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Площадка" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Все площадки</SelectItem>
-                {venues.map((venue) => (
-                  <SelectItem key={venue.id} value={venue.name}>
-                    {venue.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={filterCategory} onValueChange={setFilterCategory}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Категория" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Все категории</SelectItem>
-                {categories.map((category) => (
-                  <SelectItem key={category.id} value={category.name}>
-                    {category.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {hasFilters && (
-              <Button variant="ghost" size="sm" onClick={clearFilters}>
-                <X className="mr-1 h-4 w-4" />
-                Сбросить
-              </Button>
-            )}
-          </div>
-        </div>
 
-        {/* Events Grid */}
-        {filteredEvents.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border py-16">
-            <p className="text-lg text-muted-foreground">Мероприятия не найдены</p>
-            {hasFilters && (
-              <Button variant="link" onClick={clearFilters}>
-                Сбросить фильтры
-              </Button>
-            )}
-          </div>
-        ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredEvents.map((event) => (
-              <EventCard
-                key={event.id}
-                event={event}
-                onBuyTicket={openBuyDialog}
-              />
-            ))}
-          </div>
-        )}
-      </main>
-
-      <BuyTicketDialog
-        open={isBuyOpen}
-        onOpenChange={setIsBuyOpen}
-        event={buyingEvent}
-        users={users}
-        onSubmit={handleBuyTicket}
-      />
-    </div>
-  );
+            {/* Модалка покупки билета (OneToMany пользователь-билет) */}
+            <Dialog open={isBuyOpen} onOpenChange={setIsBuyOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Покупка билета</DialogTitle>
+                    </DialogHeader>
+                    {selectedEvent && (
+                        <form onSubmit={handleBuyTicket} className="space-y-4">
+                            <div className="p-4 bg-muted/50 rounded-lg space-y-2">
+                                <div className="font-semibold text-lg">{selectedEvent.title}</div>
+                                <div className="text-sm text-muted-foreground">{selectedEvent.venueName}</div>
+                                <div className="text-sm font-bold text-primary">{selectedEvent.formattedPrice}</div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="seatNumber">Номер места (например, VIP-12 или Ряд 3 Место 5)</Label>
+                                <Input id="seatNumber" name="seatNumber" placeholder="Укажите место" required />
+                            </div>
+                            <DialogFooter>
+                                <Button type="button" variant="outline" onClick={() => setIsBuyOpen(false)}>Отмена</Button>
+                                <Button type="submit" disabled={isSubmitting}>
+                                    {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Забронировать"}
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    )}
+                </DialogContent>
+            </Dialog>
+        </DashboardLayout>
+    );
 }

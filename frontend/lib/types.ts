@@ -45,7 +45,7 @@ export interface UserResponseDto {
 
 export interface UserRequestDto {
   username: string;
-  password: string;
+  password?: string;
   email: string;
 }
 
@@ -68,4 +68,16 @@ export interface PageResponse<T> {
   totalPages: number;
   size: number;
   number: number;
+}
+
+export interface AuthResponseDto {
+    token: string;
+    userId: number;
+    username: string;
+    email: string;
+}
+
+export interface LoginRequestDto {
+    login: string;
+    password?: string;
 }

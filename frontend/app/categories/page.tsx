@@ -1,95 +1,129 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import useSWR from "swr";
-import { Header } from "@/components/header";
+import { DashboardLayout } from "@/components/dashboard-layout";
+import { categoriesApi } from "@/lib/api";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Search } from "lucide-react";
-import { fetcher } from "@/lib/api";
+import { Label } from "@/components/ui/label";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
 import type { CategoryResponseDto } from "@/lib/types";
 
-const demoCategories: CategoryResponseDto[] = [
-  { id: 1, name: "Рок" },
-  { id: 2, name: "Шоу" },
-  { id: 3, name: "Балет" },
-  { id: 4, name: "Классика" },
-  { id: 5, name: "Комедия" },
-  { id: 6, name: "Театр" },
-  { id: 7, name: "Электроника" },
-  { id: 8, name: "18+" },
-  { id: 9, name: "Детское" },
-  { id: 10, name: "Сказка" },
-  { id: 11, name: "Джаз" },
-  { id: 12, name: "Фестиваль" },
-];
-
 export default function CategoriesPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [useDemo, setUseDemo] = useState(false);
+    const { data: categories, isLoading, mutate } = useSWR("/categories", categoriesApi.getAll);
+    const [isOpen, setIsOpen] = useState(false);
+    const [editingCategory, setEditingCategory] = useState<CategoryResponseDto | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { data: apiCategories, error } = useSWR<CategoryResponseDto[]>(
-    "/api/categories",
-    fetcher,
-    { revalidateOnFocus: false }
-  );
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        const formData = new FormData(e.currentTarget);
+        const name = formData.get("name") as string;
 
-  useEffect(() => {
-    if (error) setUseDemo(true);
-  }, [error]);
+        try {
+            if (editingCategory) {
+                await categoriesApi.update(editingCategory.id, { name });
+            } else {
+                await categoriesApi.create({ name });
+            }
+            mutate();
+            setIsOpen(false);
+        } catch (error: any) {
+            alert(error.message);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
-  const categories = useDemo ? demoCategories : (apiCategories || []);
+    const handleDelete = async (id: number) => {
+        if (!confirm("Вы уверены, что хотите удалить эту категорию?")) return;
+        try {
+            await categoriesApi.delete(id);
+            mutate();
+        } catch (error: any) {
+            alert(error.message);
+        }
+    };
 
-  const filteredCategories = categories.filter((category) =>
-    category.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+    const openDialog = (category?: CategoryResponseDto) => {
+        setEditingCategory(category || null);
+        setIsOpen(true);
+    };
 
-  return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground">Категории</h1>
-          <p className="mt-1 text-muted-foreground">
-            {useDemo && (
-              <span className="mr-2 rounded bg-yellow-100 px-2 py-0.5 text-xs text-yellow-800">
-                Демо-режим
-              </span>
-            )}
-            Категории мероприятий
-          </p>
-        </div>
-
-        <div className="mb-6">
-          <div className="relative max-w-sm">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Поиск по названию..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </div>
-
-        <div className="rounded-lg border border-border bg-card p-6">
-          {filteredCategories.length === 0 ? (
-            <p className="text-center text-muted-foreground">Категории не найдены</p>
-          ) : (
-            <div className="flex flex-wrap gap-3">
-              {filteredCategories.map((category) => (
-                <Badge
-                  key={category.id}
-                  variant="secondary"
-                  className="px-4 py-2 text-sm"
-                >
-                  {category.name}
-                </Badge>
-              ))}
+    return (
+        <DashboardLayout>
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold">Категории</h1>
+                <Button onClick={() => openDialog()}>
+                    <Plus className="mr-2 h-4 w-4" /> Добавить
+                </Button>
             </div>
-          )}
-        </div>
-      </main>
-    </div>
-  );
+
+            <div className="bg-background rounded-md border">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead className="w-[100px]">ID</TableHead>
+                            <TableHead>Название</TableHead>
+                            <TableHead className="text-right">Действия</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {isLoading ? (
+                            <TableRow>
+                                <TableCell colSpan={3} className="text-center py-10">
+                                    <Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" />
+                                </TableCell>
+                            </TableRow>
+                        ) : categories?.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={3} className="text-center py-10 text-muted-foreground">
+                                    Категорий пока нет
+                                </TableCell>
+                            </TableRow>
+                        ) : (
+                            categories?.map((category) => (
+                                <TableRow key={category.id}>
+                                    <TableCell className="font-medium">{category.id}</TableCell>
+                                    <TableCell>{category.name}</TableCell>
+                                    <TableCell className="text-right space-x-2">
+                                        <Button variant="outline" size="icon" onClick={() => openDialog(category)}>
+                                            <Pencil className="h-4 w-4" />
+                                        </Button>
+                                        <Button variant="destructive" size="icon" onClick={() => handleDelete(category.id)}>
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
+
+            <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{editingCategory ? "Редактировать категорию" : "Добавить категорию"}</DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="name">Название</Label>
+                            <Input id="name" name="name" defaultValue={editingCategory?.name} required />
+                        </div>
+                        <DialogFooter>
+                            <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>Отмена</Button>
+                            <Button type="submit" disabled={isSubmitting}>
+                                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Сохранить"}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
+        </DashboardLayout>
+    );
 }

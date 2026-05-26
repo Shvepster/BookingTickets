@@ -31,18 +31,17 @@ export const metadata: Metadata = {
 }
 
 export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
+                                       children,
+                                   }: Readonly<{
+    children: React.ReactNode
 }>) {
-  return (
-    <html lang="ru" className="bg-background">
-      <body className="font-sans antialiased">
+    return (
+        <html lang="ru" className="bg-background" suppressHydrationWarning>
+        <body className="font-sans antialiased" suppressHydrationWarning>
         <AuthProvider>
-          {children}
+            {children}
         </AuthProvider>
-        {process.env.NODE_ENV === 'production' && <Analytics />}
-      </body>
-    </html>
-  )
+        </body>
+        </html>
+    )
 }
