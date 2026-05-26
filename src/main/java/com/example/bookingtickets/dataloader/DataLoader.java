@@ -16,12 +16,16 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
+// Выполняется только для профилей dev, local или профиля по умолчанию, защищая боевую базу данных
+@Profile({"dev", "local", "default"})
 public class DataLoader implements CommandLineRunner {
 
   private final UserRepository userRepository;
@@ -29,66 +33,74 @@ public class DataLoader implements CommandLineRunner {
   private final CategoryRepository categoryRepository;
   private final EventRepository eventRepository;
   private final TicketRepository ticketRepository;
+  private final PasswordEncoder passwordEncoder; // Бин шифрования для корректного создания паролей пользователей
 
   @Override
   @Transactional
   public void run(String... args) {
+    // Безопасная проверка: если в БД уже есть записи пользователей, автозаполнение полностью пропускается
     if (userRepository.count() > 0) {
       log.info("Данные уже существуют в БД. Пропуск инициализации.");
       demonstrateNplusOneProblem();
       return;
     }
 
-    log.info("Загрузка тестовых данных...");
+    log.info("Запуск генерации тестовых данных для СУБД");
 
-    User user = new User();
-    user.setUsername("admin");
-    user.setEmail("admin@example.com");
-    userRepository.save(user);
+    User admin = createUser("admin", "admin@example.com", "admin123");
 
-    Venue venue1 = new Venue();
-    venue1.setName("Минск-Арена");
-    venue1.setAddress("пр. Победителей, 111");
-    venueRepository.save(venue1);
+    Venue arena = createVenue("Минск-Арена", "пр. Победителей, 111");
+    Venue palace = createVenue("Дворец Республики", "Октябрьская площадь, 1");
 
-    Venue venue2 = new Venue();
-    venue2.setName("Дворец Республики");
-    venue2.setAddress("Октябрьская площадь, 1");
-    venueRepository.save(venue2);
+    Category rock = createCategory("Рок");
+    Category comedy = createCategory("Комедия");
 
-    Category catRock = new Category();
-    catRock.setName("Рок");
-    categoryRepository.save(catRock);
+    Event scorpions = createEvent("Концерт Scorpions", 150.0, LocalDateTime.now().plusDays(10), arena, Set.of(rock));
+    Event standup = createEvent("Стендап Шоу", 50.0, LocalDateTime.now().plusDays(5), palace, Set.of(comedy));
 
-    Category catComedy = new Category();
-    catComedy.setName("Комедия");
-    categoryRepository.save(catComedy);
+    createTicket("VIP-1", admin, scorpions);
 
-    Event event1 = new Event();
-    event1.setTitle("Концерт Scorpions");
-    event1.setPrice(150.0);
-    event1.setDate(LocalDateTime.now().plusDays(10));
-    event1.setVenue(venue1);
-    event1.setCategories(Set.of(catRock));
-    eventRepository.save(event1);
-
-    Event event2 = new Event();
-    event2.setTitle("Стендап Шоу");
-    event2.setPrice(50.0);
-    event2.setDate(LocalDateTime.now().plusDays(5));
-    event2.setVenue(venue2);
-    event2.setCategories(Set.of(catComedy));
-    eventRepository.save(event2);
-
-    Ticket ticket = new Ticket();
-    ticket.setSeatNumber("VIP-1");
-    ticket.setUser(user);
-    ticket.setEvent(event1);
-    ticketRepository.save(ticket);
-
-    log.info("Тестовые данные успешно загружены!");
-
+    log.info("Тестовые данные успешно загружены! Создан аккаунт: admin / admin123");
     demonstrateNplusOneProblem();
+  }
+
+  private User createUser(String username, String email, String plainPassword) {
+    User user = new User();
+    user.setUsername(username);
+    user.setEmail(email);
+    user.setPassword(passwordEncoder.encode(plainPassword)); // Хэширование для безопасной авторизации
+    return userRepository.save(user);
+  }
+
+  private Venue createVenue(String name, String address) {
+    Venue venue = new Venue();
+    venue.setName(name);
+    venue.setAddress(address);
+    return venueRepository.save(venue);
+  }
+
+  private Category createCategory(String name) {
+    Category category = new Category();
+    category.setName(name);
+    return categoryRepository.save(category);
+  }
+
+  private Event createEvent(String title, Double price, LocalDateTime date, Venue venue, Set<Category> categories) {
+    Event event = new Event();
+    event.setTitle(title);
+    event.setPrice(price);
+    event.setDate(date);
+    event.setVenue(venue);
+    event.setCategories(categories);
+    return eventRepository.save(event);
+  }
+
+  private void createTicket(String seatNumber, User user, Event event) {
+    Ticket ticket = new Ticket();
+    ticket.setSeatNumber(seatNumber);
+    ticket.setUser(user);
+    ticket.setEvent(event);
+    ticketRepository.save(ticket);
   }
 
   private void demonstrateNplusOneProblem() {
