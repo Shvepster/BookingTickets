@@ -33,12 +33,11 @@ public class DataLoader implements CommandLineRunner {
   private final CategoryRepository categoryRepository;
   private final EventRepository eventRepository;
   private final TicketRepository ticketRepository;
-  private final PasswordEncoder passwordEncoder; // Бин шифрования для корректного создания паролей пользователей
+  private final PasswordEncoder passwordEncoder;
 
   @Override
   @Transactional
   public void run(String... args) {
-    // Безопасная проверка: если в БД уже есть записи пользователей, автозаполнение полностью пропускается
     if (userRepository.count() > 0) {
       log.info("Данные уже существуют в БД. Пропуск инициализации.");
       demonstrateNplusOneProblem();
@@ -55,8 +54,10 @@ public class DataLoader implements CommandLineRunner {
     Category rock = createCategory("Рок");
     Category comedy = createCategory("Комедия");
 
-    Event scorpions = createEvent("Концерт Scorpions", 150.0, LocalDateTime.now().plusDays(10), arena, Set.of(rock));
-    Event standup = createEvent("Стендап Шоу", 50.0, LocalDateTime.now().plusDays(5), palace, Set.of(comedy));
+    Event scorpions = createEvent("Концерт Scorpions", 150.0, LocalDateTime.now().plusDays(10),
+        arena, Set.of(rock));
+    Event standup = createEvent("Стендап Шоу", 50.0, LocalDateTime.now().plusDays(5),
+        palace, Set.of(comedy));
 
     createTicket("VIP-1", admin, scorpions);
 
@@ -68,7 +69,7 @@ public class DataLoader implements CommandLineRunner {
     User user = new User();
     user.setUsername(username);
     user.setEmail(email);
-    user.setPassword(passwordEncoder.encode(plainPassword)); // Хэширование для безопасной авторизации
+    user.setPassword(passwordEncoder.encode(plainPassword));
     return userRepository.save(user);
   }
 
@@ -85,7 +86,8 @@ public class DataLoader implements CommandLineRunner {
     return categoryRepository.save(category);
   }
 
-  private Event createEvent(String title, Double price, LocalDateTime date, Venue venue, Set<Category> categories) {
+  private Event createEvent(String title, Double price, LocalDateTime date,
+                            Venue venue, Set<Category> categories) {
     Event event = new Event();
     event.setTitle(title);
     event.setPrice(price);

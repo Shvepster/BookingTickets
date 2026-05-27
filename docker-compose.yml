@@ -30,7 +30,7 @@ services:
       context: .
       dockerfile: docker/frontend/Dockerfile
       args:
-        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8080}
+        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8080/api}
     container_name: booking_tickets_frontend
     depends_on:
       - backend

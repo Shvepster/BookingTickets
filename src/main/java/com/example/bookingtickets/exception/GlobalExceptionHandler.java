@@ -116,7 +116,8 @@ public class GlobalExceptionHandler {
       com.example.bookingtickets.exception.SeatAlreadyBookedException exception,
       jakarta.servlet.http.HttpServletRequest request
   ) {
-    log.warn("Попытка бронирования занятого места на {}: {}", request.getRequestURI(), exception.getMessage());
+    log.warn("Попытка бронирования занятого места на {}: {}",
+        request.getRequestURI(), exception.getMessage());
     return buildResponse(
         HttpStatus.CONFLICT,
         "Выбранное место уже занято",
@@ -130,8 +131,10 @@ public class GlobalExceptionHandler {
       org.springframework.dao.DataIntegrityViolationException exception,
       jakarta.servlet.http.HttpServletRequest request
   ) {
-    log.warn("Конфликт ограничений уникальности БД на {}: {}", request.getRequestURI(), exception.getMessage());
-    String detailMessage = "Это место было забронировано другим пользователем мгновением ранее. Пожалуйста, выберите другое место.";
+    log.warn("Конфликт ограничений уникальности БД на {}: {}",
+        request.getRequestURI(), exception.getMessage());
+    String detailMessage = "Это место было забронировано другим пользователем "
+        + "мгновением ранее. Пожалуйста, выберите другое место.";
     return buildResponse(
         HttpStatus.CONFLICT,
         "Конфликт бронирования",
