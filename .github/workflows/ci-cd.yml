@@ -6,7 +6,7 @@ on:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-  RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+  RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
   HEALTH_URL: "https://${{ secrets.RAILWAY_APP_URL }}/api/events/all"
 
 jobs:
