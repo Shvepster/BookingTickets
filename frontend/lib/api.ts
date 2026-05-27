@@ -26,11 +26,9 @@ function getAuthToken(): string | null {
 export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const token = getAuthToken();
     const headers = new Headers(options.headers);
-
     if (!(options.body instanceof FormData)) {
         headers.set("Content-Type", "application/json");
     }
-
     if (token) {
         headers.set("Authorization", `Bearer ${token}`);
     }
@@ -44,9 +42,19 @@ export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): 
         let errorMessage = "Произошла ошибка при запросе";
         try {
             const errorData = await response.json();
-            errorMessage = errorData.message || (errorData.details && errorData.details[0]) || errorMessage;
+
+            if (errorData.details && errorData.details.length > 0) {
+                errorMessage = errorData.details.map((detail: string) => {
+                    const colonIndex = detail.indexOf(": ");
+                    if (colonIndex !== -1) {
+                        return detail.substring(colonIndex + 2);
+                    }
+                    return detail;
+                }).join("\n");
+            } else {
+                errorMessage = errorData.message || errorMessage;
+            }
         } catch {
-            // Игнорируем ошибку парсинга
         }
         throw new ApiError(response.status, errorMessage);
     }
@@ -54,13 +62,10 @@ export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): 
     if (response.status === 204 || response.headers.get("content-length") === "0") {
         return {} as T;
     }
-
     return response.json();
 }
 
 export const fetcher = <T>(url: string): Promise<T> => fetchApi<T>(url);
-
-// --- Полноценные API-обертки для всех контроллеров бэкенда ---
 
 export const authApi = {
     login: (data: LoginRequestDto) => fetchApi<AuthResponseDto>("/auth/login", { method: "POST", body: JSON.stringify(data) }),
@@ -110,7 +115,7 @@ export const ticketsApi = {
     getByUserId: (userId: number) => fetchApi<TicketResponseDto[]>(`/tickets/user/${userId}`),
     getById: (id: number) => fetchApi<TicketResponseDto>(`/tickets/${id}`),
     create: (data: TicketRequestDto) => fetchApi<TicketResponseDto>("/tickets", { method: "POST", body: JSON.stringify(data) }),
-    createBulk: (data: TicketRequestDto[]) => fetchApi<void>("/tickets/bulk", { method: "POST", body: JSON.stringify(data) }), // Метод для 5 лабы
+    createBulk: (data: TicketRequestDto[]) => fetchApi<void>("/tickets/bulk", { method: "POST", body: JSON.stringify(data) }),
     delete: (id: number) => fetchApi<void>(`/tickets/${id}`, { method: "DELETE" }),
 };
 

@@ -1,3 +1,4 @@
+// frontend/app/tickets/page.tsx
 "use client";
 import { useState } from "react";
 import useSWR from "swr";
@@ -7,7 +8,6 @@ import { useAuth } from "@/lib/auth-context";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Trash2, Loader2, ShieldAlert } from "lucide-react";
-
 import {
     AlertDialog,
     AlertDialogAction,
@@ -22,7 +22,6 @@ import {
 export default function TicketsManagementPage() {
     const { isAdmin } = useAuth();
     const { data: tickets, isLoading, mutate } = useSWR("/tickets", ticketsApi.getAll);
-
     const [ticketToDelete, setTicketToDelete] = useState<number | null>(null);
 
     const executeDelete = async () => {
@@ -52,14 +51,12 @@ export default function TicketsManagementPage() {
         <DashboardLayout>
             <div className="flex flex-col space-y-6">
                 <h1 className="text-2xl font-bold">Все забронированные билеты в системе</h1>
-
                 <div className="bg-background rounded-md border">
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-[80px]">ID</TableHead>
                                 <TableHead>Событие</TableHead>
-                                <TableHead>Покупатель (User)</TableHead>
+                                <TableHead>Покупатель</TableHead>
                                 <TableHead>Место</TableHead>
                                 <TableHead className="text-right">Действия</TableHead>
                             </TableRow>
@@ -67,20 +64,19 @@ export default function TicketsManagementPage() {
                         <TableBody>
                             {isLoading ? (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="text-center py-10">
+                                    <TableCell colSpan={4} className="text-center py-10">
                                         <Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" />
                                     </TableCell>
                                 </TableRow>
                             ) : !tickets || tickets.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">Билетов в системе нет</TableCell>
+                                    <TableCell colSpan={4} className="text-center py-10 text-muted-foreground">Билетов в системе нет</TableCell>
                                 </TableRow>
                             ) : (
                                 tickets.map((ticket) => (
                                     <TableRow key={ticket.id}>
-                                        <TableCell className="font-medium">#{ticket.id}</TableCell>
                                         <TableCell>{ticket.eventTitle}</TableCell>
-                                        <TableCell className="font-semibold">{ticket.userName}</TableCell>
+                                        <TableCell className="font-semibold">{ticket.username}</TableCell>
                                         <TableCell>
                                             <span className="px-2 py-1 bg-secondary text-secondary-foreground rounded text-xs">
                                                 {ticket.seatNumber}
@@ -98,7 +94,6 @@ export default function TicketsManagementPage() {
                     </Table>
                 </div>
             </div>
-
             <AlertDialog open={!!ticketToDelete} onOpenChange={(open) => !open && setTicketToDelete(null)}>
                 <AlertDialogContent>
                     <AlertDialogHeader>

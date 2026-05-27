@@ -1,3 +1,4 @@
+// frontend/app/users/page.tsx
 "use client";
 import { useState } from "react";
 import useSWR from "swr";
@@ -11,7 +12,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Pencil, Trash2, Loader2, Mail } from "lucide-react";
 import type { UserResponseDto } from "@/lib/types";
-
 import {
     AlertDialog,
     AlertDialogAction,
@@ -29,7 +29,6 @@ export default function UsersPage() {
     const [isOpen, setIsOpen] = useState(false);
     const [editingUser, setEditingUser] = useState<UserResponseDto | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
-
     const [userToDelete, setUserToDelete] = useState<number | null>(null);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -39,7 +38,6 @@ export default function UsersPage() {
         const username = formData.get("username") as string;
         const email = formData.get("email") as string;
         const password = formData.get("password") as string;
-
         try {
             if (editingUser) {
                 await usersApi.update(editingUser.id, { username, email, password: password || undefined });
@@ -76,12 +74,10 @@ export default function UsersPage() {
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold">Пользователи</h1>
             </div>
-
             <div className="bg-background rounded-md border">
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="w-[80px]">ID</TableHead>
                             <TableHead>Логин</TableHead>
                             <TableHead>Email</TableHead>
                             {isAdmin && <TableHead className="text-right">Действия</TableHead>}
@@ -90,18 +86,17 @@ export default function UsersPage() {
                     <TableBody>
                         {isLoading ? (
                             <TableRow>
-                                <TableCell colSpan={isAdmin ? 4 : 3} className="text-center py-10">
+                                <TableCell colSpan={isAdmin ? 3 : 2} className="text-center py-10">
                                     <Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" />
                                 </TableCell>
                             </TableRow>
                         ) : users?.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={isAdmin ? 4 : 3} className="text-center py-10 text-muted-foreground">Пользователей пока нет</TableCell>
+                                <TableCell colSpan={isAdmin ? 3 : 2} className="text-center py-10 text-muted-foreground">Пользователей пока нет</TableCell>
                             </TableRow>
                         ) : (
                             users?.map((user) => (
                                 <TableRow key={user.id}>
-                                    <TableCell className="font-medium">{user.id}</TableCell>
                                     <TableCell>{user.username}</TableCell>
                                     <TableCell>
                                         <div className="flex items-center text-muted-foreground">
@@ -124,7 +119,6 @@ export default function UsersPage() {
                     </TableBody>
                 </Table>
             </div>
-
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
                 <DialogContent>
                     <DialogHeader>
@@ -152,7 +146,6 @@ export default function UsersPage() {
                     </form>
                 </DialogContent>
             </Dialog>
-
             <AlertDialog open={!!userToDelete} onOpenChange={(open) => !open && setUserToDelete(null)}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
