@@ -35,10 +35,10 @@ jobs:
         run: npm install -g @railway/cli
 
       - name: Deploy Backend to Railway
-        run: railway up --service booking-backend --detach
+        run: railway up --project 2a5d3b6a-d97e-418e-8136-d6b18e88b0fe --environment production --service booking-backend --detach
 
       - name: Deploy Frontend to Railway
-        run: railway up --service booking-frontend --detach
+        run: railway up --project 2a5d3b6a-d97e-418e-8136-d6b18e88b0fe --environment production --service booking-frontend --detach
 
   healthcheck:
     needs: deploy
