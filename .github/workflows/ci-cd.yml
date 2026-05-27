@@ -1,0 +1,51 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ master, main ]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+  HEALTH_URL: "https://${{ secrets.RAILWAY_APP_URL }}/api/events/all"
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Build and Test
+        run: mvn -B clean verify
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy Backend to Railway
+        run: railway up --service booking-backend --detach
+
+      - name: Deploy Frontend to Railway
+        run: railway up --service booking-frontend --detach
+
+  healthcheck:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for deployment to initialize
+        run: sleep 30
+
+      - name: Health Check
+        run: curl --silent --show-error --fail --retry 15 --retry-delay 10 --retry-all-errors "$HEALTH_URL"
