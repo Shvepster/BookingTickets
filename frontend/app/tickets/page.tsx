@@ -1,5 +1,5 @@
 "use client";
-
+import { useState } from "react";
 import useSWR from "swr";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { ticketsApi } from "@/lib/api";
@@ -8,21 +8,34 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Trash2, Loader2, ShieldAlert } from "lucide-react";
 
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
 export default function TicketsManagementPage() {
     const { isAdmin } = useAuth();
     const { data: tickets, isLoading, mutate } = useSWR("/tickets", ticketsApi.getAll);
 
-    const handleDelete = async (id: number) => {
-        if (!confirm("Аннулировать это бронирование билета?")) return;
+    const [ticketToDelete, setTicketToDelete] = useState<number | null>(null);
+
+    const executeDelete = async () => {
+        if (!ticketToDelete) return;
         try {
-            await ticketsApi.delete(id);
+            await ticketsApi.delete(ticketToDelete);
             mutate();
+            setTicketToDelete(null);
         } catch (error: any) {
             alert(error.message);
         }
     };
 
-    // Если пользователь не админ, показываем заглушку
     if (!isAdmin) {
         return (
             <DashboardLayout>
@@ -74,7 +87,7 @@ export default function TicketsManagementPage() {
                                             </span>
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            <Button variant="destructive" size="icon" onClick={() => handleDelete(ticket.id)}>
+                                            <Button variant="destructive" size="icon" onClick={() => setTicketToDelete(ticket.id)}>
                                                 <Trash2 className="h-4 w-4" />
                                             </Button>
                                         </TableCell>
@@ -85,6 +98,23 @@ export default function TicketsManagementPage() {
                     </Table>
                 </div>
             </div>
+
+            <AlertDialog open={!!ticketToDelete} onOpenChange={(open) => !open && setTicketToDelete(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Аннулировать билет?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Вы уверены, что хотите аннулировать это бронирование билета? Это действие нельзя отменить.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Отмена</AlertDialogCancel>
+                        <AlertDialogAction onClick={executeDelete} className="bg-destructive text-white hover:bg-destructive/90">
+                            Аннулировать
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </DashboardLayout>
     );
 }

@@ -1,5 +1,5 @@
 "use client";
-
+import { useState } from "react";
 import useSWR from "swr";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { ticketsApi } from "@/lib/api";
@@ -8,21 +8,32 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Ticket, Trash2, Loader2 } from "lucide-react";
 
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
 export default function MyTicketsPage() {
     const { user } = useAuth();
-
-    // Получаем билеты только текущего авторизованного пользователя
     const { data: tickets, isLoading, mutate } = useSWR(
         user ? `/tickets/user/${user.id}` : null,
         () => ticketsApi.getByUserId(user!.id)
     );
 
-    const handleRefund = async (id: number) => {
-        if (!confirm("Вы действительно хотите вернуть этот билет?")) return;
+    const [ticketToRefund, setTicketToRefund] = useState<number | null>(null);
+
+    const executeRefund = async () => {
+        if (!ticketToRefund) return;
         try {
-            await ticketsApi.delete(id);
+            await ticketsApi.delete(ticketToRefund);
             mutate();
-            alert("Возврат успешно оформлен!");
+            setTicketToRefund(null);
         } catch (error: any) {
             alert(error.message);
         }
@@ -67,12 +78,12 @@ export default function MyTicketsPage() {
                                         <TableCell className="font-medium">#{ticket.id}</TableCell>
                                         <TableCell className="font-semibold">{ticket.eventTitle}</TableCell>
                                         <TableCell>
-                      <span className="px-2 py-1 bg-secondary text-secondary-foreground rounded text-xs font-mono">
-                        {ticket.seatNumber}
-                      </span>
+                                            <span className="px-2 py-1 bg-secondary text-secondary-foreground rounded text-xs font-mono">
+                                                {ticket.seatNumber}
+                                            </span>
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            <Button variant="destructive" size="sm" onClick={() => handleRefund(ticket.id)}>
+                                            <Button variant="destructive" size="sm" onClick={() => setTicketToRefund(ticket.id)}>
                                                 <Trash2 className="mr-2 h-4 w-4" /> Вернуть билет
                                             </Button>
                                         </TableCell>
@@ -83,6 +94,23 @@ export default function MyTicketsPage() {
                     </Table>
                 </div>
             </div>
+
+            <AlertDialog open={!!ticketToRefund} onOpenChange={(open) => !open && setTicketToRefund(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Оформить возврат?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Вы действительно хотите вернуть этот билет? Место снова станет доступно для покупки.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Отмена</AlertDialogCancel>
+                        <AlertDialogAction onClick={executeRefund} className="bg-destructive text-white hover:bg-destructive/90">
+                            Подтвердить
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </DashboardLayout>
     );
 }

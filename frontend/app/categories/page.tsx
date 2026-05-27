@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import useSWR from "swr";
 import { DashboardLayout } from "@/components/dashboard-layout";
@@ -14,22 +13,33 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Plus, Pencil, Trash2, Loader2, Tags, Music } from "lucide-react";
 import type { CategoryResponseDto } from "@/lib/types";
 
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
 export default function CategoriesPage() {
     const { isAdmin } = useAuth();
-
-    // Исправили ключи SWR и вызовы методов на безопасные стрелочные функции
     const { data: categories, isLoading, mutate: mutateCategories } = useSWR("/categories", () => categoriesApi.getAll());
     const { data: events } = useSWR("/events", () => eventsApi.getAll());
 
     const [isOpen, setIsOpen] = useState(false);
     const [editingCategory, setEditingCategory] = useState<CategoryResponseDto | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [categoryToDelete, setCategoryToDelete] = useState<number | null>(null);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsSubmitting(true);
         const formData = new FormData(e.currentTarget);
         const name = formData.get("name") as string;
+
         try {
             if (editingCategory) {
                 await categoriesApi.update(editingCategory.id, { name });
@@ -45,11 +55,12 @@ export default function CategoriesPage() {
         }
     };
 
-    const handleDelete = async (id: number) => {
-        if (!confirm("Вы уверены, что хотите удалить эту категорию? Мероприятия потеряют этот тег.")) return;
+    const executeDelete = async () => {
+        if (!categoryToDelete) return;
         try {
-            await categoriesApi.delete(id);
+            await categoriesApi.delete(categoryToDelete);
             mutateCategories();
+            setCategoryToDelete(null);
         } catch (error: any) {
             alert(error.message);
         }
@@ -89,9 +100,7 @@ export default function CategoriesPage() {
             ) : (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     {categories?.map((category) => {
-                        // Находим мероприятия, которые содержат эту категорию
                         const categoryEvents = events?.filter(e => e.categories?.includes(category.name)) || [];
-
                         return (
                             <Card key={category.id} className="group relative hover:border-primary/50 transition-colors">
                                 <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
@@ -101,13 +110,12 @@ export default function CategoriesPage() {
                                         </div>
                                         <CardTitle className="text-lg">{category.name}</CardTitle>
                                     </div>
-
                                     {isAdmin && (
                                         <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                                             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openDialog(category)}>
                                                 <Pencil className="h-3.5 w-3.5" />
                                             </Button>
-                                            <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => handleDelete(category.id)}>
+                                            <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => setCategoryToDelete(category.id)}>
                                                 <Trash2 className="h-3.5 w-3.5" />
                                             </Button>
                                         </div>
@@ -156,6 +164,23 @@ export default function CategoriesPage() {
                     </form>
                 </DialogContent>
             </Dialog>
+
+            <AlertDialog open={!!categoryToDelete} onOpenChange={(open) => !open && setCategoryToDelete(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Удалить категорию?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Вы уверены, что хотите удалить эту категорию? Мероприятия потеряют этот тег.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Отмена</AlertDialogCancel>
+                        <AlertDialogAction onClick={executeDelete} className="bg-destructive text-white hover:bg-destructive/90">
+                            Удалить
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </DashboardLayout>
     );
 }

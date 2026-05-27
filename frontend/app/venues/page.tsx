@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import useSWR from "swr";
 import { DashboardLayout } from "@/components/dashboard-layout";
@@ -14,16 +13,26 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Plus, Pencil, Trash2, Loader2, MapPin, CalendarDays, Building2 } from "lucide-react";
 import type { VenueResponseDto } from "@/lib/types";
 
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
 export default function VenuesPage() {
     const { isAdmin } = useAuth();
-
-    // Безопасный вызов SWR с оберткой в стрелочные функции и правильными путями
     const { data: venues, isLoading, mutate: mutateVenues } = useSWR("/venues", () => venuesApi.getAll());
     const { data: events } = useSWR("/events", () => eventsApi.getAll());
 
     const [isOpen, setIsOpen] = useState(false);
     const [editingVenue, setEditingVenue] = useState<VenueResponseDto | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [venueToDelete, setVenueToDelete] = useState<number | null>(null);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -31,6 +40,7 @@ export default function VenuesPage() {
         const formData = new FormData(e.currentTarget);
         const name = formData.get("name") as string;
         const address = formData.get("address") as string;
+
         try {
             if (editingVenue) {
                 await venuesApi.update(editingVenue.id, { name, address });
@@ -46,11 +56,12 @@ export default function VenuesPage() {
         }
     };
 
-    const handleDelete = async (id: number) => {
-        if (!confirm("Удалить эту площадку? Это может привести к отмене мероприятий!")) return;
+    const executeDelete = async () => {
+        if (!venueToDelete) return;
         try {
-            await venuesApi.delete(id);
+            await venuesApi.delete(venueToDelete);
             mutateVenues();
+            setVenueToDelete(null);
         } catch (error: any) {
             alert(error.message);
         }
@@ -90,9 +101,7 @@ export default function VenuesPage() {
             ) : (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {venues?.map((venue) => {
-                        // Находим мероприятия, которые проходят на этой площадке
                         const venueEvents = events?.filter(e => e.venueName === venue.name) || [];
-
                         return (
                             <Card key={venue.id} className="group relative hover:shadow-md transition-shadow flex flex-col">
                                 <CardHeader className="pb-3">
@@ -106,13 +115,12 @@ export default function VenuesPage() {
                                                 {venue.address}
                                             </div>
                                         </div>
-
                                         {isAdmin && (
                                             <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                                                 <Button variant="secondary" size="icon" className="h-8 w-8" onClick={() => openDialog(venue)}>
                                                     <Pencil className="h-4 w-4" />
                                                 </Button>
-                                                <Button variant="destructive" size="icon" className="h-8 w-8" onClick={() => handleDelete(venue.id)}>
+                                                <Button variant="destructive" size="icon" className="h-8 w-8" onClick={() => setVenueToDelete(venue.id)}>
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
                                             </div>
@@ -126,7 +134,6 @@ export default function VenuesPage() {
                                             {venueEvents.length} запланировано
                                         </span>
                                     </div>
-
                                     {venueEvents.length > 0 ? (
                                         <div className="flex flex-wrap gap-1.5">
                                             {venueEvents.slice(0, 4).map(e => (
@@ -173,6 +180,23 @@ export default function VenuesPage() {
                     </form>
                 </DialogContent>
             </Dialog>
+
+            <AlertDialog open={!!venueToDelete} onOpenChange={(open) => !open && setVenueToDelete(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Удалить площадку?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Вы уверены, что хотите удалить эту площадку? Это может привести к отмене запланированных на ней мероприятий.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Отмена</AlertDialogCancel>
+                        <AlertDialogAction onClick={executeDelete} className="bg-destructive text-white hover:bg-destructive/90">
+                            Удалить
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </DashboardLayout>
     );
 }

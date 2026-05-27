@@ -1,8 +1,8 @@
 "use client";
-
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Calendar, Ticket, MapPin, Tags, Users, LogOut } from "lucide-react";
+// Добавили иконку Tickets для админского раздела билетов
+import { Calendar, Ticket, Tickets, MapPin, Tags, Users, LogOut } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import {
     Sidebar, SidebarContent, SidebarFooter, SidebarGroup,
@@ -10,9 +10,11 @@ import {
     SidebarMenu, SidebarMenuButton, SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
+// Добавили "Все билеты" в общий массив
 const items = [
     { title: "Афиша", url: "/", icon: Calendar },
     { title: "Мои билеты", url: "/my-tickets", icon: Ticket },
+    { title: "Все билеты", url: "/tickets", icon: Tickets },
     { title: "Площадки", url: "/venues", icon: MapPin },
     { title: "Категории", url: "/categories", icon: Tags },
     { title: "Пользователи", url: "/users", icon: Users },
@@ -44,7 +46,6 @@ export function AppSidebar() {
         <Sidebar>
             <SidebarHeader className="p-4 border-b">
                 <div className="flex items-center gap-2 font-bold text-xl">
-                    {/* ИСПРАВЛЕНО: заменено на фирменную синюю иконку */}
                     <TicketproIcon className="h-6 w-6 shrink-0" />
                     <span>BookingTickets</span>
                 </div>
@@ -55,8 +56,11 @@ export function AppSidebar() {
                     <SidebarGroupContent>
                         <SidebarMenu>
                             {items.map((item) => {
-                                // Скрываем "Пользователи" от не-админов
-                                if (item.title === "Пользователи" && !isAdmin) return null;
+                                // Скрываем "Пользователи" и "Все билеты" от не-админов
+                                if ((item.title === "Пользователи" || item.title === "Все билеты") && !isAdmin) {
+                                    return null;
+                                }
+
                                 return (
                                     <SidebarMenuItem key={item.title}>
                                         <SidebarMenuButton asChild isActive={pathname === item.url}>

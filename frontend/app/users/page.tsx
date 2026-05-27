@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import useSWR from "swr";
 import { DashboardLayout } from "@/components/dashboard-layout";
@@ -10,16 +9,28 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Loader2, Mail } from "lucide-react";
+import { Pencil, Trash2, Loader2, Mail } from "lucide-react";
 import type { UserResponseDto } from "@/lib/types";
+
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function UsersPage() {
     const { isAdmin } = useAuth();
     const { data: users, isLoading, mutate } = useSWR("/users", usersApi.getAll);
-
     const [isOpen, setIsOpen] = useState(false);
     const [editingUser, setEditingUser] = useState<UserResponseDto | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const [userToDelete, setUserToDelete] = useState<number | null>(null);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -28,6 +39,7 @@ export default function UsersPage() {
         const username = formData.get("username") as string;
         const email = formData.get("email") as string;
         const password = formData.get("password") as string;
+
         try {
             if (editingUser) {
                 await usersApi.update(editingUser.id, { username, email, password: password || undefined });
@@ -43,11 +55,12 @@ export default function UsersPage() {
         }
     };
 
-    const handleDelete = async (id: number) => {
-        if (!confirm("Удалить пользователя?")) return;
+    const executeDelete = async () => {
+        if (!userToDelete) return;
         try {
-            await usersApi.delete(id);
+            await usersApi.delete(userToDelete);
             mutate();
+            setUserToDelete(null);
         } catch (error: any) {
             alert(error.message);
         }
@@ -62,11 +75,6 @@ export default function UsersPage() {
         <DashboardLayout>
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold">Пользователи</h1>
-                {isAdmin && (
-                    <Button onClick={() => openDialog()}>
-                        <Plus className="mr-2 h-4 w-4" /> Добавить
-                    </Button>
-                )}
             </div>
 
             <div className="bg-background rounded-md border">
@@ -105,7 +113,7 @@ export default function UsersPage() {
                                             <Button variant="outline" size="icon" onClick={() => openDialog(user)}>
                                                 <Pencil className="h-4 w-4" />
                                             </Button>
-                                            <Button variant="destructive" size="icon" onClick={() => handleDelete(user.id)}>
+                                            <Button variant="destructive" size="icon" onClick={() => setUserToDelete(user.id)}>
                                                 <Trash2 className="h-4 w-4" />
                                             </Button>
                                         </TableCell>
@@ -144,6 +152,23 @@ export default function UsersPage() {
                     </form>
                 </DialogContent>
             </Dialog>
+
+            <AlertDialog open={!!userToDelete} onOpenChange={(open) => !open && setUserToDelete(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Удалить пользователя?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Вы уверены, что хотите удалить этого пользователя? Это действие нельзя отменить.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Отмена</AlertDialogCancel>
+                        <AlertDialogAction onClick={executeDelete} className="bg-destructive text-white hover:bg-destructive/90">
+                            Удалить
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </DashboardLayout>
     );
 }
