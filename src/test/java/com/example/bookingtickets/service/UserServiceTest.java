@@ -66,7 +66,7 @@ class UserServiceTest {
 
     UserResponseDto response = userService.update(1L, requestDto);
     assertNotNull(response);
-    assertEquals("test_user", response.getUsername());
+    assertEquals("testUser", response.getUsername());
     verify(passwordEncoder).encode("password123");
   }
 
