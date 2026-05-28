@@ -10,7 +10,7 @@ public class WebConfig implements WebMvcConfigurer {
   @Override
   public void addCorsMappings(CorsRegistry registry) {
     registry.addMapping("/**") // Разрешаем CORS для всех эндпоинтов
-        .allowedOrigins("http://localhost:5173", "http://localhost:3000", "https://booking-frontend-production-a8ab.up.railway.app") // Порты твоего фронтенда
+        .allowedOrigins("http://localhost:5432", "http://localhost:5173", "http://localhost:3000", "https://booking-frontend-production-a8ab.up.railway.app") // Порты твоего фронтенда
         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
         .allowedHeaders("*")
         .allowCredentials(true);
