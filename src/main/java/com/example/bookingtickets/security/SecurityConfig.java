@@ -24,7 +24,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @RequiredArgsConstructor
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class SecurityConfig {
-
   private final JwtAuthenticationFilter jwtFilter;
 
   @Bean
@@ -36,8 +35,7 @@ public class SecurityConfig {
         .authorizeHttpRequests(a -> a
             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
             .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-            .requestMatchers(HttpMethod.GET, "/api/events/**",
-                "/api/categories/**", "/api/venues/**").permitAll()
+            .requestMatchers(HttpMethod.GET, "/api/events/**", "/api/categories/**", "/api/venues/**").permitAll()
             .anyRequest().authenticated()
         )
         .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
@@ -52,7 +50,11 @@ public class SecurityConfig {
   @Bean
   public CorsConfigurationSource corsSource() {
     var config = new CorsConfiguration();
-    config.setAllowedOriginPatterns(List.of("http://localhost:5173", "http://localhost:3000"));
+    config.setAllowedOriginPatterns(List.of(
+        "http://localhost:*",
+        "https://*.railway.app",
+        "https://*.vercel.app"
+    ));
     config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
     config.setAllowedHeaders(List.of("*"));
     config.setAllowCredentials(true);
