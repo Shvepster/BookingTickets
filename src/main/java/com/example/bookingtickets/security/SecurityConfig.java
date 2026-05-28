@@ -27,20 +27,23 @@ public class SecurityConfig {
   private final JwtAuthenticationFilter jwtFilter;
 
   @Bean
-  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    return http
-        .cors(c -> c.configurationSource(corsSource()))
-        .csrf(AbstractHttpConfigurer::disable)
-        .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authorizeHttpRequests(a -> a
-            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-            .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-            .requestMatchers(HttpMethod.GET, "/api/events/**", "/api/categories/**",
-                "/api/venues/**").permitAll()
-            .anyRequest().authenticated()
-        )
-        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-        .build();
+  public SecurityFilterChain filterChain(HttpSecurity http) {
+    try {
+      return http
+          .cors(c -> c.configurationSource(corsSource()))
+          .csrf(AbstractHttpConfigurer::disable)
+          .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+          .authorizeHttpRequests(a -> a
+              .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+              .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+              .requestMatchers(HttpMethod.GET, "/api/events/**", "/api/categories/**", "/api/venues/**").permitAll()
+              .anyRequest().authenticated()
+          )
+          .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+          .build();
+    } catch (Exception e) {
+      throw new IllegalStateException("Ошибка конфигурации SecurityFilterChain", e);
+    }
   }
 
   @Bean

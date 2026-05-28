@@ -40,7 +40,6 @@ public class DataLoader implements CommandLineRunner {
   public void run(String... args) {
     if (userRepository.count() > 0) {
       log.info("Данные уже существуют в БД. Пропуск инициализации.");
-      demonstrateNplusOneProblem();
       return;
     }
 
@@ -56,13 +55,12 @@ public class DataLoader implements CommandLineRunner {
 
     Event scorpions = createEvent("Концерт Scorpions", 150.0, LocalDateTime.now().plusDays(10),
         arena, Set.of(rock));
-    Event standup = createEvent("Стендап Шоу", 50.0, LocalDateTime.now().plusDays(5),
+    createEvent("Стендап Шоу", 50.0, LocalDateTime.now().plusDays(5),
         palace, Set.of(comedy));
 
     createTicket("VIP-1", admin, scorpions);
 
     log.info("Тестовые данные успешно загружены! Создан аккаунт: admin / admin123");
-    demonstrateNplusOneProblem();
   }
 
   private User createUser(String username, String email, String plainPassword) {
@@ -105,12 +103,4 @@ public class DataLoader implements CommandLineRunner {
     ticketRepository.save(ticket);
   }
 
-  private void demonstrateNplusOneProblem() {
-    log.info("НАЧАЛО ДЕМОНСТРАЦИИ РЕШЕНИЯ С @EntityGraph");
-    List<Event> goodEvents = eventRepository.findAll();
-    for (Event e : goodEvents) {
-      log.info("Мероприятие: {}, Площадка: {}", e.getTitle(), e.getVenue().getName());
-    }
-    log.info("КОНЕЦ ХОРОШЕГО ВАРИАНТА");
-  }
 }
